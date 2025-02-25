@@ -3,2345 +3,1021 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>yaproom (official) - v2.1.3</title>
+  <title>YapRoom Chat</title>
   <style>
-    /* GENERAL RESET & CONTAINER */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Base Reset & Global Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #f8f8f8; color: #333; padding: 10px;
+      font-family: Arial, sans-serif;
+      background: #f8f8f8; /* Light mode background */
+      color: #333;
       transition: background 0.3s, color 0.3s;
     }
-    .container { max-width: 480px; margin: 0 auto; padding: 10px; }
-    /* CONTAINERS (Login, Chat, Settings, Leaderboard, Duel Speed Game, RPS Game) */
-    #loginDiv, #chatDiv, #settingsDiv, #leaderboardDiv, #duelSpeedGameDiv, #rpsGameDiv {
-      background: #ffffff; border-radius: 8px; padding: 16px; margin-top: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    /* MODAL OVERLAYS (placed outside .container in the HTML) */
-    #changelogOverlay,
-    #helpModal,
-    #profileModal,
-    #opToolsModal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0,0,0,0.7);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.3s ease;
-    }
-    /* Scrollable modal content */
-    #changelogModal,
-    #opToolsContent {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 400px;
-      width: 90%;
-      color: #000;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    #changelogModal ul { margin: 10px 0; padding-left: 30px; }
-    /* Profile Modal Content */
-    #profileContent {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 400px;
-      width: 90%;
-      color: #000;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-    /* DUEL SPEED GAME UI */
-    #duelSpeedGameDiv { text-align: center; }
-    #duelSpeedCounters p { font-size: 18px; margin: 8px 0; }
-    #duelSpeedClickButton {
-      padding: 12px; font-size: 16px; border: none; border-radius: 6px;
-      background: #7289da; color: #fff; cursor: pointer; transition: background 0.2s;
-    }
-    #duelSpeedClickButton:disabled { background: #ccc; cursor: not-allowed; }
-    /* RPS GAME UI */
-    #rpsGameDiv { text-align: center; }
-    #rpsChoices button {
-      margin: 5px; padding: 10px 20px; font-size: 16px;
-      border: none; border-radius: 6px; background: #7289da; color: #fff;
-      cursor: pointer; transition: background 0.2s;
-    }
-    #rpsChoices button:hover { background: #677bc4; }
-    #rpsResult { margin-top: 10px; font-size: 16px; font-weight: bold; }
-    #rpsPlayAgainButton { margin-top: 10px; }
-    /* LEADERBOARD UI */
-    #leaderboardDiv h2 { margin-bottom: 12px; font-weight: 600; }
-    #leaderboardDiv h3 { margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
-    #leaderboardDiv ol { padding-left: 20px; }
-    /* DARK MODE */
+    /* When dark mode is on, set the entire page background dark */
     body.dark-mode {
-      background: #2f3136; color: #dcdcdc;
+      background: #2f3136 !important; /* The entire place goes dark */
+      color: #dcdcdc !important;
     }
-    body.dark-mode #loginDiv,
-    body.dark-mode #chatDiv,
-    body.dark-mode #settingsDiv,
-    body.dark-mode #leaderboardDiv,
-    body.dark-mode #duelSpeedGameDiv,
-    body.dark-mode #rpsGameDiv,
-    body.dark-mode #changelogOverlay,
-    body.dark-mode #helpModal,
-    body.dark-mode #profileModal,
-    body.dark-mode #opToolsModal,
-    body.dark-mode #opToolsContent {
-      background: #36393f; color: #dcdcdc;
+
+    /* Container - no explicit background so dark mode can show through */
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px;
     }
-    body.dark-mode textarea {
-      background: #40444b; color: #dcdcdc; border: 1px solid #4f545c;
+    body.dark-mode .container {
+      background: none; /* or transparent, so the dark body background shows */
     }
-    body.dark-mode button {
-      background: #4f545c; color: #dcdcdc; border: 1px solid #4f545c;
+
+    /* Main Menu */
+    #mainMenu {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
     }
-    body.dark-mode select {
-      background: #40444b; color: #dcdcdc; border: 1px solid #4f545c;
+    body.dark-mode #mainMenu {
+      background: #36393f;
+      border-color: #4f545c;
+      color: #dcdcdc;
     }
-    /* FORM ELEMENTS */
-    input[type="text"], textarea, select {
-      width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc;
-      border-radius: 6px; font-size: 14px;
+    #mainMenu h2 {
+      margin-bottom: 12px;
     }
-    button {
-      width: 100%; padding: 8px; border: none; border-radius: 6px;
-      background: #7289da; color: #fff; font-size: 14px; cursor: pointer;
-      transition: background 0.2s;
+    #loginForm, #accountInfo {
+      margin-top: 12px;
     }
-    button:hover { background: #677bc4; }
-    /* HEADERS & TEXT */
-    h2, h3 { margin-bottom: 12px; font-weight: 600; }
-    p { margin-bottom: 8px; font-size: 14px; }
-    .tutorial-box {
-      background: #fafafa; padding: 6px; border-radius: 4px; font-size: 13px;
-      margin-bottom: 8px;
-    }
-    body.dark-mode .tutorial-box { background: #40444b; color: #dcdcdc; }
-    /* CHAT MESSAGES */
-    #messages {
-      list-style: none; padding: 0; max-height: 300px; overflow-y: auto;
-      margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px;
-      background: #ffffff;
-    }
-    body.dark-mode #messages { background: #40444b; border-color: #4f545c; }
-    #messages li {
-      padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 14px;
-    }
-    #messages li:last-child { border-bottom: none; }
-    .account-user { color: #7289da; font-weight: bold; }
-    .anonymous-user { color: #333; }
-    .broadcast-msg {
-      background: #ffeb3b; color: #333; font-weight: bold;
-      padding: 4px; border-radius: 4px;
-    }
-    /* TEXTAREA AUTO-RESIZE */
-    textarea { resize: none; min-height: 40px; max-height: 120px; overflow-y: auto; }
-    /* DM SECTION */
-    #dmSection { margin-top: 10px; border-top: 1px solid #ccc; padding-top: 8px; }
-    #dmMessages, #dm2Messages, #dm3Messages {
-      list-style: none; padding: 0; max-height: 200px; overflow-y: auto;
-      margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px;
-      background: #ffffff;
-    }
-    body.dark-mode #dmMessages,
-    body.dark-mode #dm2Messages,
-    body.dark-mode #dm3Messages {
-      background: #40444b; border-color: #4f545c;
-    }
-    #dmMessages li, #dm2Messages li, #dm3Messages li {
-      padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 14px;
-    }
-    /* REWORKED MEMBERS LIST */
-    #memberListContainer {
-      background: #ffffff; 
-      border: 1px solid #ddd; 
-      border-radius: 6px; 
-      padding: 10px; 
-      margin-top: 10px;
-    }
-    #memberListHeader {
-      margin-bottom: 8px; 
-      font-size: 18px; 
-      font-weight: 600;
-    }
-    #memberListSearch input {
-      width: 100%;
-      padding: 6px;
-      margin-bottom: 10px;
+    #loginForm input[type="text"],
+    #loginForm input[type="password"],
+    #accountInfo input[type="text"],
+    #accountInfo input[type="password"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 12px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    #memberList {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .member-item {
-      display: flex;
-      align-items: center;
-      padding: 6px;
-      border-bottom: 1px solid #eee;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-    .member-item:hover {
-      background: #f0f0f0;
-    }
-    .member-avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: #7289da;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 10px;
-      font-weight: bold;
-    }
-    .member-name {
-      font-size: 14px;
-      color: #333;
-    }
-    /* Dark mode overrides for the members list */
-    body.dark-mode #memberListContainer {
-      background: #2f3136; 
-      border: 1px solid #4f545c;
-    }
-    body.dark-mode #memberListSearch input {
+    body.dark-mode #loginForm input,
+    body.dark-mode #accountInfo input {
       background: #40444b;
       color: #dcdcdc;
       border: 1px solid #4f545c;
     }
-    body.dark-mode .member-item {
-      border-bottom: 1px solid #4f545c;
+    #loginForm button, #accountInfo button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #7289da;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin: 4px;
     }
-    body.dark-mode .member-item:hover {
+    #loginForm button:hover, #accountInfo button:hover {
+      background: #677bc4;
+    }
+
+    /* Chat Wrapper: Sidebar + Chat Area */
+    #chatWrapper {
+      display: none;
+      height: 90vh;
+      display: flex;
+    }
+
+    /* Server List Sidebar */
+    #serverList {
+      width: 80px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      margin-right: 10px;
+    }
+    body.dark-mode #serverList {
       background: #36393f;
-    }
-    body.dark-mode .member-name {
+      border-color: #4f545c;
       color: #dcdcdc;
     }
-    /* MESSAGE ANIMATION */
-    @keyframes message-enter {
-      0% { transform: scale(0.8); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+    #serverList .server-item {
+      width: 60px;
+      height: 60px;
+      background: #7289da;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      text-align: center;
+      padding: 4px;
+      font-size: 10px;
     }
-    .message-enter { animation: message-enter 0.3s ease forwards; }
-    /* EXTRA SETTINGS HEADINGS */
-    #settingsDiv h3 { margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
-    /* Custom Font Classes */
-    .font-arial { font-family: Arial, sans-serif; }
-    .font-georgia { font-family: Georgia, serif; }
-    .font-courier { font-family: "Courier New", monospace; }
-    .font-comic { font-family: "Comic Sans MS", cursive, sans-serif; }
-    .font-roboto { font-family: Roboto, sans-serif; }
-    .font-times { font-family: "Times New Roman", Times, serif; }
-    .font-verdana { font-family: Verdana, sans-serif; }
-    .font-trebuchet { font-family: "Trebuchet MS", sans-serif; }
-    .font-lucida { font-family: "Lucida Sans Unicode", sans-serif; }
-    .font-garamond { font-family: Garamond, serif; }
-    .font-helvetica { font-family: Helvetica, sans-serif; }
-    .font-tahoma { font-family: Tahoma, sans-serif; }
-    .font-impact { font-family: Impact, sans-serif; }
-    .font-futura { font-family: Futura, sans-serif; }
-    .font-open-sans { font-family: "Open Sans", sans-serif; }
-    .font-lato { font-family: Lato, sans-serif; }
-    .font-montserrat { font-family: Montserrat, sans-serif; }
-    
-    /* ---------- Reworked OP Tools Modal Styles ---------- */
-    #opToolsContent h2 { text-align: center; margin-bottom: 16px; }
-    #opToolsContent section { margin-bottom: 16px; }
-    #opToolsContent section h3 { margin-bottom: 8px; font-size: 16px; }
-    #opToolsContent input[type="text"],
-    #opToolsContent input[type="number"],
-    #opToolsContent select,
-    #opToolsContent input[type="color"] { width: 100%; }
-    #opToolsContent button { width: auto; margin-top: 4px; }
+    #serverList .server-item.active {
+      border: 3px solid #fff;
+    }
+    #serverList .plus-button {
+      width: 70px;
+      height: 70px;
+      background: #ccc;
+      border-radius: 8px;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      margin-top: auto;
+      font-size: 35px;
+      line-height: 0;
+    }
+    body.dark-mode #serverList .server-item {
+      background: #4f545c;
+    }
+    body.dark-mode #serverList .plus-button {
+      background: #4f545c;
+      color: #dcdcdc;
+    }
+
+    /* Chat Area */
+    #chatArea {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    body.dark-mode #chatArea {
+      background: #36393f;
+      border-color: #4f545c;
+      color: #dcdcdc;
+    }
+    #chatHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    #chatHeader h2 {
+      font-size: 20px;
+    }
+    #chatHeader .header-buttons button {
+      padding: 6px 12px;
+      font-size: 14px;
+      background: #7289da;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+    #messages {
+      flex: 1;
+      list-style: none;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fff;
+      overflow-y: auto;
+      margin-bottom: 8px;
+    }
+    body.dark-mode #messages {
+      background: #40444b;
+      border-color: #4f545c;
+    }
+    #messages li {
+      padding: 6px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-break: break-all;
+    }
+    #messages li:last-child {
+      border-bottom: none;
+    }
+    body.dark-mode #messages li {
+      border-bottom: 1px solid #4f545c;
+    }
+    #chatControls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    #chatControls textarea {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: none;
+    }
+    body.dark-mode #chatControls textarea {
+      background: #40444b;
+      color: #dcdcdc;
+      border: 1px solid #4f545c;
+    }
+    #chatControls button {
+      padding: 10px 16px;
+      font-size: 14px;
+      background: #7289da;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #chatControls button:hover {
+      background: #677bc4;
+    }
+    /* Member List */
+    #memberListContainer {
+      margin-top: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px;
+    }
+    body.dark-mode #memberListContainer {
+      background: #36393f;
+      border-color: #4f545c;
+      color: #dcdcdc;
+    }
+    #memberListContainer h3 {
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+    #memberList {
+      list-style: none;
+      padding: 0;
+      font-size: 14px;
+    }
+    #memberList li {
+      padding: 4px;
+      border-bottom: 1px solid #eee;
+    }
+    #memberList li:last-child {
+      border-bottom: none;
+    }
+    /* Modals Base */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 350px;
+      text-align: center;
+      border-radius: 8px;
+    }
+    body.dark-mode .modal-content {
+      background-color: #36393f;
+      color: #dcdcdc;
+      border-color: #4f545c;
+    }
+    /* Delete Modal (popover style) */
+    #deleteModal {
+      display: none;
+      position: absolute;
+      z-index: 2100;
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #888;
+      border-radius: 4px;
+    }
+    body.dark-mode #deleteModal {
+      background-color: #36393f;
+      color: #dcdcdc;
+      border-color: #4f545c;
+    }
+    /* Settings Modal */
+    #settingsScreen .modal-content {
+      width: 350px;
+    }
+    #settingsContent label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    #settingsContent select,
+    #settingsContent input[type="file"] {
+      margin-bottom: 12px;
+      padding: 6px;
+      font-size: 14px;
+    }
+    #settingsContent button {
+      padding: 8px 16px;
+      font-size: 14px;
+      background: #7289da;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    /* Additional Settings: Fonts, Music & Notifications */
+    #settingsFonts,
+    #settingsMusic,
+    #settingsNotifications {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    #settingsFonts label,
+    #settingsMusic label,
+    #settingsNotifications label {
+      font-size: 14px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    /* Dark Mode Overrides for Inputs/Buttons are above. */
   </style>
 </head>
 <body>
-  <!-- Modal Overlays -->
-  <div id="changelogOverlay">
-    <div id="changelogModal">
-      <h2>Alpha v2.1.3</h2>
-      <ul>
-        <li>Updated UI and layout for improved performance.</li>
-        <li>Added background music controls, sound notifications, and message timestamp toggles.</li>
-        <li>Integrated Duel Speed and Rock–Paper–Scissors minigames.</li>
-        <li>Fixed Member List bug.</li>
-        <li>Initialized user profiles with proper win/loss stats.</li>
-        <li>Fixed the settings tab so it now opens correctly.</li>
-        <li>Adjusted GUI scaling to uniformly scale the entire interface (including text).</li>
-        <li>Added filtering for messages from undefined players with a settings toggle.</li>
-        <li>Added a Leaderboard tab with separate sections for RPS, Duel Speed, and Overall wins.</li>
-        <li>Recreated the OP Tools section with its button moved to the main menu under Settings.</li>
-      </ul>
-      <button onclick="hideChangeLog()">Close</button>
-    </div>
-  </div>
-
-  <div id="helpModal">
-    <div id="helpModalContent">
-      <h2>Help &amp; Commands</h2>
-      <ul>
-        <li>/createroom [roomName] - Create a group chat room</li>
-        <li>/join [roomName] - Join a group chat room</li>
-        <li>/invite [accountName] - Invite someone to a group chat room</li>
-        <li>/leave - Leave the current group chat room</li>
-        <li>/duelspeed [account] - Challenge someone to a Duel Speed game</li>
-        <li>/rps [account] - Challenge someone to a Rock–Paper–Scissors game</li>
-        <li>/accept - Accept a pending challenge</li>
-        <li>/decline - Decline a pending challenge</li>
-      </ul>
-      <button onclick="hideHelpWindow()">Close</button>
-    </div>
-  </div>
-
-  <div id="profileModal">
-    <div id="profileContent">
-      <h2 id="profileUsername"></h2>
-      <p id="profileRank"></p>
-      <p id="profileRPS"></p>
-      <p id="profileDuels"></p>
-      <button onclick="hideProfileModal()">Close</button>
-    </div>
-  </div>
-
-  <!-- Reworked OP Tools Modal -->
-  <div id="opToolsModal">
-    <div id="opToolsContent">
-      <h2>OP Tools</h2>
-      <!-- User Actions Section -->
-      <section id="opUserActions">
-        <h3>User Actions</h3>
-        <input type="text" id="opTargetUser" placeholder="Target Username" />
-        <select id="opActionSelect">
-          <option value="mute">Mute User</option>
-          <option value="unmute">Unmute User</option>
-          <option value="terminate">Terminate User</option>
-        </select>
-        <button id="opExecuteAction">Execute</button>
-      </section>
-      <!-- Color Picker Section -->
-      <section id="opColorSection">
-        <h3>Set User Color</h3>
-        <input type="color" id="opColorPicker" value="#7289da" />
-        <button id="opSetColor">Set Name Color</button>
-      </section>
-      <!-- Chat Controls Section -->
-      <section id="opChatControls">
-        <h3>Chat Controls</h3>
-        <button id="opClearChat">Clear Global Chat</button>
-        <button id="opClearTyping">Clear Global Typing</button>
-      </section>
-      <!-- Chat Restrictions Section -->
-      <section id="opChatRestrictions">
-        <h3>Chat Restrictions</h3>
-        <label for="usernameLengthLimit">Max Username Length:</label>
-        <input type="number" id="usernameLengthLimit" min="1" value="20" />
-        <button id="opUpdateUsernameLimit">Update</button>
-        <br/><br/>
-        <label for="messageLengthLimit">Max Message Length:</label>
-        <input type="number" id="messageLengthLimit" min="1" value="100" />
-        <button id="opUpdateMessageLimit">Update</button>
-      </section>
-      <!-- Custom Title Assignment Section -->
-      <section id="opCustomTitle">
-        <h3>Custom Title Assignment</h3>
-        <input type="text" id="customTitleUsername" placeholder="Username (leave blank for self)" />
-        <input type="text" id="customTitleInput" placeholder="Custom Title" />
-        <button id="opAssignTitle">Assign Custom Title</button>
-      </section>
-      <button id="opCloseModal">Close</button>
-    </div>
-  </div>
-
-  <div id="leaderboardDiv" style="display:none;">
-    <h2>Leaderboard</h2>
-    <h3>Most RPS Wins</h3>
-    <ol id="rpsLeaderboard"></ol>
-    <h3>Most Duel Speed Wins</h3>
-    <ol id="duelsLeaderboard"></ol>
-    <h3>Most Overall Wins</h3>
-    <ol id="overallLeaderboard"></ol>
-    <button onclick="closeLeaderboardPage()">Back</button>
-  </div>
-
-  <!-- MAIN CONTENT -->
   <div class="container">
-    <!-- LOGIN SCREEN / MAIN MENU -->
-    <div id="loginDiv">
-      <h2>Enter Chat</h2>
-      <p>Anonymous / Temporary Name:</p>
-      <input type="text" id="anonymousInput" class="username-input" placeholder="Anonymous Name" />
-      <button onclick="initiateChatSession()" class="enter-chat-btn">Start Chatting</button>
-      <hr />
-      <h3>Account</h3>
-      <div id="notLoggedInUI">
-        <input type="text" id="accNameInput" placeholder="Desired username" />
-        <input type="text" id="accPassInput" placeholder="Password" />
-        <button onclick="registerOrAccessAccount()">Create/Login Account</button>
+    <!-- Main Menu -->
+    <div id="mainMenu">
+      <h2>Welcome to YapRoom Chat</h2>
+      <!-- Login/Register Form -->
+      <div id="loginForm">
+        <input type="text" id="accUsername" placeholder="Enter username (max 20 chars)" maxlength="20" />
+        <br />
+        <input type="password" id="accPassword" placeholder="Enter password" />
+        <br />
+        <button onclick="registerOrLoginAccount()">Login / Register</button>
+        <br />
+        <button onclick="openSettings()">Settings</button>
       </div>
-      <div id="loggedInUI" style="display:none;">
-        <p>Logged in as: <span id="loggedInName"></span></p>
-        <input type="text" id="renameInput" placeholder="New username" />
-        <button onclick="changeUserName()">Rename Account</button>
-        <br /><br />
-        <input type="text" id="changePassInput" placeholder="New Password" />
-        <button onclick="updateUserPassword()">Change Password</button>
-        <br /><br />
-        <button onclick="performAccountLogout()">Log Out</button>
-      </div>
-      <hr />
-      <button onclick="openSettingsPage()">Settings</button>
-      <!-- OP Tools button placed under Settings -->
-      <button id="opToolsMainButton" onclick="openOpToolsModal()">funny button heheheh >:D</button>
-    </div>
-
-    <!-- CHAT SCREEN -->
-    <div id="chatDiv" style="display:none;">
-      <h2>Yap Room</h2>
-      <div class="tutorial-box">
-        <strong>Group Chat Commands:</strong><br/>
-        /createroom [roomName]<br/>
-        /join [roomName]<br/>
-        /invite [accountName]<br/>
-        /leave<br/><br/>
-        <strong>Duel Speed Command:</strong><br/>
-        /duelspeed [account]<br/>
-        (Then type /accept or /decline.)<br/><br/>
-        <strong>Rock–Paper–Scissors Command:</strong><br/>
-        /rps [account]<br/>
-        (Then type /accept to accept or /decline to decline.)
-      </div>
-      <ul id="messages"></ul>
-      <div id="typingStatus"></div>
-      <div class="chat-controls">
-        <textarea id="messageInput" placeholder="Type a message" oninput="processTypingIndicator()"></textarea>
-        <button onclick="dispatchMessage()">Send</button>
-        <button onclick="eraseChatDisplay()">Clear Chat</button>
-        <button onclick="openLeaderboardPage()">Leaderboard</button>
-      </div>
-      <!-- DM SECTION -->
-      <div id="dmSection">
-        <h3>Direct Messages</h3>
-        <div id="dmLoginWarning" style="color:red; display:none;">You must be logged in to use DMs.</div>
-        <div id="dmUI" style="display:none;">
-          <p><strong>DM #1</strong> – Type a username to DM:</p>
-          <input type="text" id="dmTargetInput" placeholder="Username to DM" />
-          <button onclick="launchDMChannel1()">Open DM</button>
-          <div id="dmConversation" style="display:none; margin-top:10px;">
-            <ul id="dmMessages"></ul>
-            <div class="dm-controls">
-              <textarea id="dmMessageInput" placeholder="Type a direct message" oninput="processTypingIndicator()"></textarea>
-              <button onclick="transmitDMChannel1()">Send DM</button>
-            </div>
-          </div>
-          <hr/>
-          <p><strong>DM #2</strong> – Type a username to DM:</p>
-          <input type="text" id="dm2TargetInput" placeholder="Username to DM" />
-          <button onclick="launchDMChannel2()">Open DM #2</button>
-          <div id="dm2Conversation" style="display:none; margin-top:10px;">
-            <ul id="dm2Messages"></ul>
-            <div class="dm-controls">
-              <textarea id="dm2MessageInput" placeholder="Type a direct message" oninput="processTypingIndicator()"></textarea>
-              <button onclick="transmitDMChannel2()">Send DM #2</button>
-            </div>
-          </div>
-          <hr/>
-          <p><strong>DM #3</strong> – Type a username to DM:</p>
-          <input type="text" id="dm3TargetInput" placeholder="Username to DM" />
-          <button onclick="launchDMChannel3()">Open DM #3</button>
-          <div id="dm3Conversation" style="display:none; margin-top:10px;">
-            <ul id="dm3Messages"></ul>
-            <div class="dm-controls">
-              <textarea id="dm3MessageInput" placeholder="Type a direct message" oninput="processTypingIndicator()"></textarea>
-              <button onclick="transmitDMChannel3()">Send DM #3</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- REWORKED MEMBERS LIST -->
-      <div id="memberListContainer">
-        <h3 id="memberListHeader">Members Online</h3>
-        <div id="memberListSearch">
-          <input type="text" id="memberListFilter" placeholder="Filter members..." oninput="filterMemberList()" />
-        </div>
-        <ul id="memberList"></ul>
-      </div>
-      <div style="text-align:center; margin-top:10px;">
-        <button onclick="goBackToMainScreen()">Return to Main Screen</button>
-        <button onclick="displayHelpWindow()">Help</button>
+      <!-- Account Info -->
+      <div id="accountInfo" style="display:none;">
+        <p>Logged in as: <span id="currentAcc"></span></p>
+        <button onclick="startChat()">Start Chatting</button>
+        <br />
+        <button onclick="changeUsername()">Change Username</button>
+        <button onclick="changePassword()">Change Password</button>
+        <button onclick="logoutAccount()">Log Out</button>
+        <br />
+        <button onclick="openSettings()">Settings</button>
       </div>
     </div>
 
-    <!-- SETTINGS SCREEN -->
-    <div id="settingsDiv" style="display:none;">
+    <!-- Chat Wrapper -->
+    <div id="chatWrapper" style="display:none;">
+      <!-- Server List Sidebar -->
+      <div id="serverList">
+        <!-- Public Chat and channels appear here -->
+      </div>
+      <!-- Main Chat Area -->
+      <div id="chatArea">
+        <div id="chatHeader">
+          <h2 id="currentServerName">Public Chat</h2>
+          <div class="header-buttons">
+            <button onclick="openSettings()">Settings</button>
+            <button onclick="returnToMainMenu()">Return to Main Menu</button>
+          </div>
+        </div>
+        <ul id="messages"></ul>
+        <div id="chatControls">
+          <textarea id="messageInput" placeholder="Type your message (max 100 chars)"></textarea>
+          <button onclick="sendMessage()">Send</button>
+        </div>
+        <!-- Global Member List -->
+        <div id="memberListContainer">
+          <h3>Members Online</h3>
+          <ul id="memberList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plus Modal -->
+  <div id="plusModal" class="modal">
+    <div class="modal-content">
+      <h3>Select Action</h3>
+      <button onclick="selectPlusAction('create')">Create Room</button>
+      <button onclick="selectPlusAction('join')">Join Room</button>
+      <button onclick="selectPlusAction('dm')">Add DM</button>
+      <button onclick="closePlusModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Input Modal -->
+  <div id="inputModal" class="modal">
+    <div class="modal-content">
+      <h3 id="inputModalTitle">Input</h3>
+      <input type="text" id="inputModalField" placeholder="" />
+      <br />
+      <button onclick="submitInputModal()">Submit</button>
+      <button onclick="closeInputModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Delete Modal (popover) -->
+  <div id="deleteModal">
+    <p id="deleteModalText">Delete this channel?</p>
+    <button onclick="confirmDeleteChannel()">Delete</button>
+    <button onclick="closeDeleteModal()">Cancel</button>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsScreen" class="modal">
+    <div id="settingsContent" class="modal-content">
       <h2>Settings</h2>
       <label>
-        <input type="checkbox" id="themeToggle" onchange="switchDarkMode()" />
+        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" />
         Dark Mode
       </label>
-      <br/><br/>
-      <label for="guiSizeRange">GUI Size</label>
-      <input type="range" id="guiSizeRange" min="0.5" max="2.0" step="0.1" value="1.0" onchange="adjustGuiScaling()" />
-      <p id="guiSizeValue"></p>
-      <label for="fontSelect">Choose Font:</label>
-      <select id="fontSelect" onchange="changeUIFont()">
-        <option value="font-arial">Arial</option>
-        <option value="font-georgia">Georgia</option>
-        <option value="font-courier">Courier New</option>
-        <option value="font-comic">Comic Sans MS</option>
-        <option value="font-roboto">Roboto</option>
-        <option value="font-times">Times New Roman</option>
-        <option value="font-verdana">Verdana</option>
-        <option value="font-trebuchet">Trebuchet MS</option>
-        <option value="font-lucida">Lucida Sans Unicode</option>
-        <option value="font-garamond">Garamond</option>
-        <option value="font-helvetica">Helvetica</option>
-        <option value="font-tahoma">Tahoma</option>
-        <option value="font-impact">Impact</option>
-        <option value="font-futura">Futura</option>
-        <option value="font-open-sans">Open Sans</option>
-        <option value="font-lato">Lato</option>
-        <option value="font-montserrat">Montserrat</option>
-      </select>
-      <br/><br/>
-      <label>
-        <input type="checkbox" id="notificationsToggle" onchange="switchDesktopNotifications()" />
-        Enable Desktop Notifications
-      </label>
-      <br/><br/>
-      <h3>Background Music</h3>
-      <label for="musicFileInput">Upload Music:</label>
-      <input type="file" id="musicFileInput" accept="audio/*" />
-      <br/>
-      <button onclick="switchBackgroundMusic()">Play/Pause Music</button>
-      <label>Volume:</label>
-      <input type="range" id="musicVolume" min="0" max="1" step="0.01" value="1" onchange="modifyMusicVolume()" />
-      <button onclick="removeBackgroundMusic()">Remove Music</button>
-      <br/><br/>
-      <h3>Sound Notifications</h3>
-      <label>
-        <input type="checkbox" id="soundToggle" onchange="switchSoundAlerts()" />
-        Enable Chat Sound Notifications
-      </label>
-      <br/>
-      <label for="soundVolume">Sound Volume:</label>
-      <input type="range" id="soundVolume" min="0" max="1" step="0.01" value="1" onchange="modifySoundVolume()" />
-      <br/><br/>
-      <h3>Message Timestamps</h3>
-      <label>
-        <input type="checkbox" id="timestampToggle" onchange="switchTimestampDisplay()" />
-        Show Message Timestamps (hover to view)
-      </label>
-      <br/><br/>
-      <label>
-        <input type="checkbox" id="showUndefinedCheckbox" onchange="toggleUndefinedMessages()" />
-        Show messages from undefined players
-      </label>
-      <br/><br/>
-      <!-- NEW Titles Section in Settings -->
-      <h3>Titles</h3>
-      <div id="titlesContainer"></div>
-      <br/>
-      <button onclick="returnToSettingsOrLogin()">Back</button>
-    </div>
-
-    <!-- DUEL SPEED GAME UI -->
-    <div id="duelSpeedGameDiv" style="display:none;">
-      <h2>Duel Speed</h2>
-      <div id="duelSpeedStatus">Get Ready...</div>
-      <div id="duelSpeedCounters">
-        <p id="player1Counter"></p>
-        <p id="player2Counter"></p>
+      <div id="settingsFonts">
+        <label for="fontSelect">Choose Font:</label>
+        <select id="fontSelect" onchange="changeUIFont()">
+          <option value="Arial, sans-serif">Arial</option>
+          <option value="Georgia, serif">Georgia</option>
+          <option value="Courier New, monospace">Courier New</option>
+          <option value="'Comic Sans MS', cursive, sans-serif">Comic Sans MS</option>
+          <option value="Roboto, sans-serif">Roboto</option>
+          <option value="'Times New Roman', serif">Times New Roman</option>
+          <option value="Verdana, sans-serif">Verdana</option>
+          <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+          <option value="'Lucida Sans Unicode', sans-serif">Lucida Sans Unicode</option>
+          <option value="'Open Sans', sans-serif">Open Sans</option>
+          <option value="Lato, sans-serif">Lato</option>
+          <option value="Montserrat, sans-serif">Montserrat</option>
+        </select>
       </div>
-      <button id="duelSpeedClickButton" onclick="recordDuelSpeedClick()">Click Me!</button>
-    </div>
-
-    <!-- ROCK-PAPER-SCISSORS GAME UI -->
-    <div id="rpsGameDiv" style="display:none;">
-      <h2>Rock–Paper–Scissors</h2>
-      <div id="rpsStatus">Make your choice:</div>
-      <div id="rpsChoices">
-        <button onclick="selectRPSOption('rock')">Rock ✊</button>
-        <button onclick="selectRPSOption('paper')">Paper ✋</button>
-        <button onclick="selectRPSOption('scissors')">Scissors ✌️</button>
+      <div id="settingsMusic">
+        <label for="musicFileInput">Background Music (mp3):</label>
+        <input type="file" id="musicFileInput" accept="audio/*" />
+        <br />
+        <button onclick="toggleMusic()">Play/Pause Music</button>
+        <br />
+        <label for="musicVolume">Music Volume:</label>
+        <input type="range" id="musicVolume" min="0" max="1" step="0.01" value="1" onchange="changeMusicVolume()" />
+        <br />
+        <button onclick="removeMusic()">Remove Music</button>
       </div>
-      <div id="rpsResult"></div>
-      <button id="rpsPlayAgainButton" style="display:none;" onclick="restartRPSMatch()">Play Again</button>
+      <div id="settingsNotifications">
+        <label>
+          <input type="checkbox" id="notificationsToggle" onchange="toggleNotifications()" />
+          Enable Desktop Notifications
+        </label>
+      </div>
+      <button onclick="closeSettings()">Back</button>
     </div>
   </div>
 
-  <!-- Hidden Audio Elements -->
+  <!-- Background Music Audio Element -->
   <audio id="bgMusic" loop></audio>
-  <audio id="chatSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
-
-  <!-- Firebase SDK -->
+  
+  <!-- Firebase + SHA256 scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-
+  
   <script>
-    // Define a unique client identifier so that OP authorization works correctly.
-    const clientIdentifier = 'client_' + Math.floor(Math.random() * 1000000);
-    
-    // Set required client version
-    const NEW_CLIENT_VERSION = 201;
-
-    /* =====================================================
-       Firebase Configuration & Initialization
-       ===================================================== */
-    const newFirebaseConfig = {
-      apiKey: "AIzaSyBkm5Lf3PaghllqcatG_FymhTm_x7mGa28",
-      authDomain: "yaproom-14cfe.firebaseapp.com",
-      databaseURL: "https://yaproom-14cfe-default-rtdb.firebaseio.com",
-      projectId: "yaproom-14cfe",
-      storageBucket: "yaproom-14cfe",
-      messagingSenderId: "5332542311",
-      appId: "1:5332542311:web:f1a1ab2fb81bf62b0b45c2"
+    /*********************** Firebase Initialization ************************/
+    const firebaseConfig = {
+      apiKey: "AIzaSyCN0KVGqw7PdcUI3RX8i-_CfOyQadDBcuI",
+      authDomain: "yaproomv2.firebaseapp.com",
+      projectId: "yaproomv2",
+      storageBucket: "yaproomv2.firebasestorage.app",
+      messagingSenderId: "155778580025",
+      appId: "1:155778580025:web:99f76220d897de01e3d7e8",
+      measurementId: "G-0SX9ZPJ227"
     };
-    firebase.initializeApp(newFirebaseConfig);
-    const newDB = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // New Firebase database key names
-    const NEW_KEYS = {
-      accounts: "accts_new",
-      typing: "typing_new",
-      messages: "msgs_new",
-      groupRooms: "group_rooms_new",
-      dms: "dms_new",
-      broadcasts: "bcasts_new",
-      presence: "activeUsers_new",
-      opCommandChecks: "opCmdAuth_new",
-      duelSpeedChallenges: "duelSpeedContests_new",
-      rpsChallenges: "rpsContests_new",
-      duelSpeedGames: "matches_new/duel_speed_new",
-      rpsGames: "matches_new/rps_new",
-      accountColors: "acctColors_new",
-      mutedUsers: "mutedUsers_new",
-      stats: "stats_new"
-    };
+    // Connection check
+    const connectedRef = db.ref(".info/connected");
+    connectedRef.on("value", snapshot => {
+      console.log(snapshot.val() ? "Connected to Firebase" : "Not connected to Firebase");
+    });
 
-    /* =====================================================
-       Global Variables, Title System, and OP List
-       ===================================================== */
-    let opList = {};
-    let lastMsgTimestamp = 2000;
-    const RATE_LIMIT = 2000;
-    const forbiddenWords = ["shit","fuck","bitch","nigga","fucking","shitting","negro","bullshit","pussy"];
+    /*********************** Global Variables & References ********************/
     let currentUser = null;
-    let currentUserPassHash = null;
-    let accountRemovalListener = null;
-    let renamingFlag = false;
-    let currentDMChannel = null, dmListener1 = null;
-    let currentDMChannel2 = null, dmListener2 = null;
-    let currentDMChannel3 = null, dmListener3 = null;
-    let inGroupChatMode = false, activeGroupRoom = null, groupRoomListener = null;
-    let typingTimer = null;
-    let mutedList = {};
-    let userColors = {};
-    let publicMsgs = [];
-    let publicListenerAddNew = null, publicListenerRemoveNew = null;
-    let userPresenceRef = null;
-    // Duel Speed variables
-    let pendingDuelContest = null;
-    let acceptedDuelContest = null;
-    let duelGameID = null;
-    let isDuelHost = false;
-    let duelGameRef = null;
-    let duelCountdownInterval = null;
-    // RPS variables
-    let pendingRPSContest = null;
-    let acceptedRPSContest = null;
-    let rpsGameID = null;
-    let isRPSHost = false;
-    let rpsGameRef = null;
-    let rpsPlayerOne = "";
-    let rpsPlayerTwo = "";
-    let rpsGameEndTimer = null;
+    let accountData = null;
+    let currentServer = { type: "public", id: "public", name: "Public Chat" };
+    let currentMessageListener = null;
+    let serverList = [];
+    const MAX_USERNAME = 20;
+    const MAX_MESSAGE = 100;
+    
+    const publicMessagesRef = db.ref("publicMessages");
+    const dmsRef = db.ref("dms");
+    const groupRoomsRef = db.ref("groupRooms");
+    const accountsRef = db.ref("accounts");
+    const presenceRef = db.ref("presence");
 
-    // Title system variables
-    const availableTitles = [
-      {
-        id: "starter",
-        name: "Starter",
-        description: "Play a single match in any mode.",
-        condition: (stats) => (stats.totalMatches || 0) >= 1
-      },
-      {
-        id: "novice",
-        name: "Novice",
-        description: "Win 5 matches in any mode.",
-        condition: (stats) => (stats.totalWins || 0) >= 5
-      },
-      {
-        id: "gooder",
-        name: "Gooder",
-        description: "Win 10 matches in any mode.",
-        condition: (stats) => (stats.totalWins || 0) >= 10
-      },
-      {
-        id: "gooder+",
-        name: "Gooder+",
-        description: "Win 15 matches in any mode.",
-        condition: (stats) => (stats.totalWins || 0) >= 15
-      },
-      {
-        id: "gooder++",
-        name: "Gooder++",
-        description: "Win 20 matches in any mode.",
-        condition: (stats) => (stats.totalWins || 0) >= 20
-      },
-      {
-        id: "gooder+++",
-        name: "Gooder+++",
-        description: "Win 25 matches in any mode.",
-        condition: (stats) => (stats.totalWins || 0) >= 25
-      },
-      {
-        id: "leaderboard_contender",
-        name: "Leaderboard Contender",
-        description: "Earned by being in the top 3 of at least one leaderboard.",
-        condition: function(stats) { return currentUserIsTop3RPS || currentUserIsTop3Duels || currentUserIsTop3Overall; }
-      },
-      {
-        id: "game_master",
-        name: "Game Master",
-        description: "Earned by being in the top 3 of all leaderboards.",
-        condition: function(stats) { return currentUserIsTop3RPS && currentUserIsTop3Duels && currentUserIsTop3Overall; }
-      }
-    ];
-    let userTitles = {};
-
-    newDB.ref(NEW_KEYS.accounts).on("child_added", function(snap) {
-      const accountData = snap.val();
-      const username = snap.key;
-      userTitles[username] = { equipped: accountData.equippedTitle || "" };
-    });
-    newDB.ref(NEW_KEYS.accounts).on("child_changed", function(snap) {
-      const accountData = snap.val();
-      const username = snap.key;
-      userTitles[username] = { equipped: accountData.equippedTitle || "" };
-    });
-
-    let currentUserIsTop3RPS = false, currentUserIsTop3Duels = false, currentUserIsTop3Overall = false;
-    let maxUsernameLength = localStorage.getItem("maxUsernameLength") ? parseInt(localStorage.getItem("maxUsernameLength")) : 20;
-    let maxMessageLength = localStorage.getItem("maxMessageLength") ? parseInt(localStorage.getItem("maxMessageLength")) : 100;
-
-    function updateUsernameLengthLimit() {
-      maxUsernameLength = parseInt(document.getElementById("usernameLengthLimit").value);
-      localStorage.setItem("maxUsernameLength", maxUsernameLength);
-      alert("Max Username Length set to " + maxUsernameLength);
-    }
-    function updateMessageLengthLimit() {
-      maxMessageLength = parseInt(document.getElementById("messageLengthLimit").value);
-      localStorage.setItem("maxMessageLength", maxMessageLength);
-      alert("Max Message Length set to " + maxMessageLength);
-    }
-
-    function assignCustomTitle() {
-      if (!isUserOP()) {
-        alert("Only OPs can assign custom titles.");
+    /*********************** Account Functions ************************/
+    function registerOrLoginAccount() {
+      const username = document.getElementById("accUsername").value.trim();
+      const password = document.getElementById("accPassword").value;
+      if (!username || !password) {
+        alert("Please enter username and password.");
         return;
       }
-      let targetUser = document.getElementById("customTitleUsername").value.trim();
-      if (!targetUser) {
-        targetUser = currentUser;
-      }
-      let customTitle = document.getElementById("customTitleInput").value.trim();
-      if (!customTitle) {
-        alert("Please enter a custom title.");
+      if (username.length > MAX_USERNAME) {
+        alert("Username must be 20 characters or less.");
         return;
       }
-      newDB.ref(NEW_KEYS.accounts + "/" + targetUser + "/equippedTitle")
-        .set(customTitle)
-        .then(function() {
-          if (targetUser === currentUser) {
-            if (!userTitles[currentUser]) userTitles[currentUser] = {};
-            userTitles[currentUser].equipped = customTitle;
+      const passHash = sha256(password);
+      accountsRef.child(username).once("value").then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.passwordHash !== passHash) {
+            alert("Incorrect password.");
+            return;
+          } else {
+            currentUser = username;
+            accountData = data;
+            afterLogin();
           }
-          alert("Custom title '" + customTitle + "' assigned to " + targetUser + ".");
-        })
-        .catch(function(error) {
-          alert("Error assigning custom title: " + error);
-        });
-    }
-
-    function fetchOpList() {
-      newDB.ref("opList").on("value", function(snapshot) {
-        opList = snapshot.val() || {};
-        refreshOpSectionVisibility();
-      }, function(error) {
-        console.error("Error fetching op list:", error);
-      });
-    }
-
-    function isUserOP() {
-      if (!currentUser) return false;
-      const opVal = opList[currentUser.toLowerCase()];
-      return opVal === true || opVal === "true";
-    }
-
-    function refreshOpSectionVisibility() {
-      const opToolsBtn = document.getElementById("opToolsMainButton");
-      if (opToolsBtn) {
-        opToolsBtn.style.display = isUserOP() ? "block" : "none";
-      }
-    }
-
-    function verifyOpCommandAuthorization(callback) {
-      if (!currentUser) { callback(false); return; }
-      const opCheckRef = newDB.ref(NEW_KEYS.opCommandChecks + "/" + currentUser);
-      const checkPayload = { clientID: clientIdentifier, timestamp: firebase.database.ServerValue.TIMESTAMP };
-      opCheckRef.set(checkPayload, (err) => {
-         if (err) { alert("Error in op authorization check."); callback(false); }
-         else {
-           opCheckRef.once("value", (snap) => {
-             const data = snap.val();
-             if (data && data.clientID === clientIdentifier) { callback(true); }
-             else { callback(false); }
-           });
-         }
-      });
-    }
-
-    function openOpToolsModal() {
-      if (!isUserOP()) {
-        alert("You must be an op to access the OP tools section.");
-        return;
-      }
-      document.getElementById("opToolsModal").style.display = "flex";
-    }
-    function closeOpToolsModal() {
-      document.getElementById("opToolsModal").style.display = "none";
-    }
-    function setOpUserColorModal() {
-      if (!isUserOP()) {
-        alert("You must be an op to use this tool.");
-        return;
-      }
-      const chosenColor = document.getElementById("opColorPicker").value;
-      newDB.ref(NEW_KEYS.accountColors + "/" + currentUser).set(chosenColor)
-        .then(() => { alert("Your chat color has been updated to: " + chosenColor); });
-    }
-    newDB.ref(NEW_KEYS.accountColors).on("value", (snap) => {
-      userColors = snap.val() || {};
-      updateMessageColors();
-    });
-    function updateMessageColors() {
-      const messages = document.querySelectorAll("li[data-user]");
-      messages.forEach(li => {
-        const user = li.getAttribute("data-user");
-        if (user && opList && opList[user.toLowerCase()] && userColors[user]) {
-          const span = li.querySelector("span");
-          if (span) {
-            span.style.color = userColors[user];
-            span.style.fontWeight = "bold";
-          }
-        }
-      });
-    }
-
-    (function(){
-      async function terminateUserAccount(target, valid) {
-        if (!valid) { alert("Direct terminate disabled. Use securelyTerminateAccount."); return; }
-        if (!isUserOP() && target === currentUser) {
-          alert("Unauthorized op command. Your account will be terminated.");
-        }
-        try {
-          await newDB.ref(NEW_KEYS.accounts + "/" + target).remove();
-          await newDB.ref(NEW_KEYS.accountColors + "/" + target).remove();
-          await newDB.ref(NEW_KEYS.typing + "/" + target).remove();
-          await newDB.ref(NEW_KEYS.mutedUsers + "/" + target).remove();
-          const snapMsgs = await newDB.ref(NEW_KEYS.messages).once("value");
-          snapMsgs.forEach((child) => {
-            const val = child.val();
-            if (val.user && val.user === target) { child.ref.remove(); }
-          });
-          alert(`Account "${target}" has been TERMINATED.`);
-          if (target === currentUser) { performAccountLogout(); }
-        } catch(e) { alert("Error terminating account: " + e); }
-      }
-      function securelyTerminateAccount(target) {
-        verifyOpCommandAuthorization(function(valid){
-          if (valid) { terminateUserAccount(target, true); }
-          else { alert("Op authorization failed. Command voided."); }
-        });
-      }
-      function muteUser(target, valid) {
-        if (!valid) { alert("Direct mute disabled. Use securelyMuteUser."); return; }
-        newDB.ref(NEW_KEYS.mutedUsers + "/" + target).set({ value: true, op: currentUser, clientVersion: NEW_CLIENT_VERSION });
-        alert(`User "${target}" has been muted.`);
-      }
-      function securelyMuteUser(target) {
-        verifyOpCommandAuthorization(function(valid){
-          if (valid) { muteUser(target, true); }
-          else { alert("Op authorization failed. Command voided."); }
-        });
-      }
-      function unmuteUser(target, valid) {
-        if (!valid) { alert("Direct unmute disabled. Use securelyUnmuteUser."); return; }
-        newDB.ref(NEW_KEYS.mutedUsers + "/" + target).remove();
-        alert(`User "${target}" has been unmuted.`);
-      }
-      function securelyUnmuteUser(target) {
-        verifyOpCommandAuthorization(function(valid){
-          if (valid) { unmuteUser(target, true); }
-          else { alert("Op authorization failed. Command voided."); }
-        });
-      }
-      async function clearGlobalChat(valid) {
-        if (!valid) { alert("Direct clear chat disabled. Use securelyClearChatGlobal."); return; }
-        await newDB.ref(NEW_KEYS.messages).remove();
-        await newDB.ref(NEW_KEYS.broadcasts).remove();
-        document.getElementById("messages").innerHTML = "";
-        publicMsgs = [];
-        alert("All messages and broadcasts cleared for everyone.");
-      }
-      function securelyClearChatGlobal() {
-        verifyOpCommandAuthorization(function(valid){
-          if (valid) { clearGlobalChat(true); }
-          else { alert("Op authorization failed. Command voided."); }
-        });
-      }
-      function clearGlobalTyping(valid) {
-        if (!valid) { alert("Direct clear typing disabled. Use securelyClearTypingGlobal."); return; }
-        newDB.ref(NEW_KEYS.typing).remove();
-        alert("All typing statuses have been cleared for everyone.");
-      }
-      function securelyClearTypingGlobal() {
-        verifyOpCommandAuthorization(function(valid){
-          if (valid) { clearGlobalTyping(true); }
-          else { alert("Op authorization failed. Command voided."); }
-        });
-      }
-      window.securelyTerminateAccount = securelyTerminateAccount;
-      window.securelyMuteUser = securelyMuteUser;
-      window.securelyUnmuteUser = securelyUnmuteUser;
-      window.securelyClearChatGlobal = securelyClearChatGlobal;
-      window.securelyClearTypingGlobal = securelyClearTypingGlobal;
-    })();
-
-    /* ------------------ Separated Win Granters ------------------ */
-    function updateOverallStats(username) {
-      newDB.ref(NEW_KEYS.stats + "/" + username).once("value").then(function(snap) {
-        const stats = snap.val() || {};
-        const rpsWins = (stats.rps && stats.rps.wins) || 0;
-        const duelsWins = (stats.duels && stats.duels.wins) || 0;
-        const totalWins = rpsWins + duelsWins;
-        const rpsMatches = stats.rps ? (stats.rps.wins + stats.rps.losses) : 0;
-        const duelsMatches = stats.duels ? (stats.duels.wins + stats.duels.losses) : 0;
-        const totalMatches = rpsMatches + duelsMatches;
-        
-        newDB.ref(NEW_KEYS.stats + "/" + username).update({
-          totalWins: totalWins,
-          totalMatches: totalMatches
-        });
-      });
-    }
-    function grantDuelSpeedWin(winner, loser) {
-      newDB.ref(NEW_KEYS.stats + "/" + winner + "/duels/wins")
-           .transaction(current => (current || 0) + 1);
-      
-      newDB.ref(NEW_KEYS.stats + "/" + loser + "/duels/losses")
-           .transaction(current => (current || 0) + 1);
-      
-      updateOverallStats(winner);
-    }
-    function grantRPSWin(winner, loser) {
-      newDB.ref(NEW_KEYS.stats + "/" + winner + "/rps/wins")
-           .transaction(current => (current || 0) + 0.5);
-      
-      newDB.ref(NEW_KEYS.stats + "/" + loser + "/rps/losses")
-           .transaction(current => (current || 0) + 0.5);
-      
-      updateOverallStats(winner);
-    }
-
-    /* ------------------ End Separated Win Granters ------------------ */
-
-    function loadUserTitlesInSettings(userStats) {
-      const container = document.getElementById("titlesContainer");
-      container.innerHTML = "";
-      
-      availableTitles.forEach(title => {
-        const unlocked = title.condition(userStats);
-        const btn = document.createElement("button");
-        btn.textContent = title.name;
-        btn.disabled = !unlocked;
-        if (!unlocked) {
-          btn.innerHTML += " 🔒";
-          btn.style.opacity = 0.5;
-        }
-        btn.onclick = function() {
-          newDB.ref(NEW_KEYS.accounts + "/" + currentUser + "/equippedTitle").set(title.name).then(() => {
-            if (!userTitles[currentUser]) userTitles[currentUser] = {};
-            userTitles[currentUser].equipped = title.name;
-            alert("Equipped title: " + title.name);
-          });
-        };
-        container.appendChild(btn);
-      });
-    }
-
-    function initializeTextAreaShortcuts(textAreaId, sendCallback) {
-      const ta = document.getElementById(textAreaId);
-      ta.addEventListener("keydown", function(e) {
-        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendCallback(); }
-      });
-      ta.addEventListener("input", adjustTextareaHeight);
-    }
-
-    function adjustTextareaHeight(e) {
-      const ta = e.target;
-      ta.style.height = "auto";
-      ta.style.height = (ta.scrollHeight) + "px";
-    }
-
-    function refreshChatMessages() {
-      const messagesUl = document.getElementById("messages");
-      messagesUl.innerHTML = "";
-      publicMsgs.forEach(msgObj => {
-        if ((!msgObj.user || msgObj.user.trim() === "") && localStorage.getItem("showUndefinedMessages") !== "true") {
-          return;
-        }
-        renderChatMessage(msgObj.user, msgObj.text, msgObj.isAccount, false, msgObj.key, msgObj.timestamp);
-      });
-    }
-
-    function activatePublicChatListeners() {
-      newDB.ref(NEW_KEYS.messages).off("child_added", publicListenerAddNew);
-      newDB.ref(NEW_KEYS.messages).off("child_removed", publicListenerRemoveNew);
-      publicMsgs = [];
-      document.getElementById("messages").innerHTML = "";
-      publicListenerAddNew = newDB.ref(NEW_KEYS.messages).on("child_added", (snap) => {
-        const msg = snap.val();
-        const key = snap.key;
-        if (msg.user && mutedList[msg.user]) return;
-        publicMsgs.push({ key, ...msg });
-        if ((msg.user && msg.user.trim() !== "") || localStorage.getItem("showUndefinedMessages") === "true") {
-          renderChatMessage(msg.user, msg.text, msg.isAccount, false, key, msg.timestamp);
-        }
-      });
-      publicListenerRemoveNew = newDB.ref(NEW_KEYS.messages).on("child_removed", (snap) => {
-        const remKey = snap.key;
-        publicMsgs = publicMsgs.filter(m => m.key !== remKey);
-        const li = document.querySelector(`li[data-key="${remKey}"]`);
-        if (li) li.remove();
-      });
-    }
-
-    function toggleUndefinedMessages() {
-      const checkbox = document.getElementById("showUndefinedCheckbox");
-      localStorage.setItem("showUndefinedMessages", checkbox.checked ? "true" : "false");
-      refreshChatMessages();
-    }
-
-    function verifyMentionsAndAlert(sender, text) {
-      if (!currentUser || !text) return;
-      const lowerText = text.toLowerCase();
-      const mentionStr = "@" + currentUser.toLowerCase();
-      if (lowerText.includes(mentionStr) && sender !== currentUser) {
-        displayDMAlert(sender, text);
-      }
-    }
-
-    async function registerOrAccessAccount() {
-      let desiredName = document.getElementById("accNameInput").value.trim();
-      if (desiredName.length > maxUsernameLength) {
-        alert("Usernames can be at most " + maxUsernameLength + " characters long.");
-        return;
-      }
-      const desiredPass = document.getElementById("accPassInput").value.trim();
-      if (!desiredName || !desiredPass) { alert("Please provide both a username and a password."); return; }
-      if (/\s/.test(desiredName)) { alert("Usernames cannot contain spaces."); return; }
-      const passHash = sha256(desiredPass);
-      try {
-        const snap = await newDB.ref(NEW_KEYS.accounts + "/" + desiredName).once("value");
-        if (!snap.exists()) {
-          await newDB.ref(NEW_KEYS.accounts + "/" + desiredName).set({
+        } else {
+          const newAccount = {
             passwordHash: passHash,
-            createdAt: Date.now(),
-            clientVersion: NEW_CLIENT_VERSION
+            darkMode: false,
+            channels: {}
+          };
+          accountsRef.child(username).set(newAccount, error => {
+            if (error) alert("Error creating account: " + error);
+            else {
+              currentUser = username;
+              accountData = newAccount;
+              afterLogin();
+            }
           });
-          await newDB.ref(NEW_KEYS.stats + "/" + desiredName).set({
-            rps: { wins: 0, losses: 0 },
-            duels: { wins: 0, losses: 0 }
-          });
-          alert("Account created! Logged in as: " + desiredName);
-        } else {
-          const data = snap.val();
-          if (data.passwordHash !== passHash) { alert("Incorrect password or name is taken by someone else."); return; }
-          alert("Logged in successfully as: " + desiredName);
-          const statsSnap = await newDB.ref(NEW_KEYS.stats + "/" + desiredName).once("value");
-          if (!statsSnap.exists()) {
-            await newDB.ref(NEW_KEYS.stats + "/" + desiredName).set({
-              rps: { wins: 0, losses: 0 },
-              duels: { wins: 0, losses: 0 }
-            });
-          }
-        }
-        currentUser = desiredName;
-        currentUserPassHash = passHash;
-        localStorage.setItem("acc_username", currentUser);
-        localStorage.setItem("acc_passHash", currentUserPassHash);
-        refreshAccountInterface();
-      } catch(e) { alert("Error during account access: " + e); }
-    }
-
-    function refreshAccountInterface() {
-      const notLogged = document.getElementById("notLoggedInUI");
-      const loggedIn = document.getElementById("loggedInUI");
-      const loggedNameSpan = document.getElementById("loggedInName");
-      const anonInputField = document.getElementById("anonymousInput");
-      if (currentUser && currentUserPassHash) {
-        notLogged.style.display = "none";
-        loggedIn.style.display = "block";
-        loggedNameSpan.textContent = currentUser;
-        anonInputField.value = currentUser;
-        anonInputField.disabled = true;
-        monitorAccountRemoval();
-        monitorDuelSpeedContests();
-        monitorRPSContests();
-      } else {
-        notLogged.style.display = "block";
-        loggedIn.style.display = "none";
-        anonInputField.value = "";
-        anonInputField.disabled = false;
-        if (accountRemovalListener) { accountRemovalListener.off("value"); accountRemovalListener = null; }
-      }
-      refreshDMInterface();
-      refreshOpSectionVisibility();
-    }
-
-    function monitorAccountRemoval() {
-      if (accountRemovalListener) { accountRemovalListener.off("value"); accountRemovalListener = null; }
-      if (!currentUser) return;
-      accountRemovalListener = newDB.ref(NEW_KEYS.accounts + "/" + currentUser);
-      accountRemovalListener.on("value", (snap) => {
-        if (!snap.exists() && !renamingFlag) {
-          alert("Your account has been terminated!");
-          performAccountLogout();
         }
       });
     }
-
-    async function performAccountLogout() {
-      clearUserTypingStatus();
-      if (accountRemovalListener) { accountRemovalListener.off("value"); accountRemovalListener = null; }
-      if (userPresenceRef) { userPresenceRef.remove(); userPresenceRef = null; }
-      localStorage.removeItem("acc_username");
-      localStorage.removeItem("acc_passHash");
-      currentUser = null;
-      currentUserPassHash = null;
-      alert("Logged out.");
-      refreshAccountInterface();
+    
+    function afterLogin() {
+      localStorage.setItem("currentUser", currentUser);
+      localStorage.setItem("accountData", JSON.stringify(accountData));
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("accountInfo").style.display = "block";
+      document.getElementById("currentAcc").textContent = currentUser;
+      serverList = [];
+      if (accountData.channels) {
+        for (let key in accountData.channels) {
+          serverList.push(accountData.channels[key]);
+        }
+      }
+      if (accountData.darkMode) {
+        document.getElementById("darkModeToggle").checked = true;
+        document.body.classList.add("dark-mode");
+      } else {
+        document.getElementById("darkModeToggle").checked = false;
+        document.body.classList.remove("dark-mode");
+      }
     }
-
-    function clearUserTypingStatus() {
-      if (currentUser) { newDB.ref(NEW_KEYS.typing + "/" + currentUser).remove(); }
-    }
-
-    async function changeUserName() {
-      if (!currentUser || !currentUserPassHash) { alert("Not logged in, cannot rename."); return; }
-      const newName = document.getElementById("renameInput").value.trim();
-      if (!newName) { alert("Enter a new username."); return; }
-      if (newName.length > maxUsernameLength) {
-        alert("Usernames can be at most " + maxUsernameLength + " characters long.");
+    
+    function changeUsername() {
+      const newName = prompt("Enter new username (max " + MAX_USERNAME + " characters):");
+      if (!newName) return;
+      if (newName.length > MAX_USERNAME) {
+        alert("Username too long.");
         return;
       }
-      if (/\s/.test(newName)) { alert("Usernames cannot contain spaces!"); return; }
-      const snap = await newDB.ref(NEW_KEYS.accounts + "/" + currentUser).once("value");
-      if (!snap.exists()) { alert("Your account no longer exists."); return; }
-      const currentData = snap.val();
-      const lastRename = currentData.lastRenamed || 0;
-      const now = Date.now();
-      const TWELVE_HOURS = 12 * 60 * 60 * 1000;
-      if (now - lastRename < TWELVE_HOURS) {
-        const hrsLeft = Math.ceil((TWELVE_HOURS - (now - lastRename)) / (1000 * 60 * 60));
-        alert(`Wait ${hrsLeft} more hour(s) before renaming again!`);
-        return;
-      }
-      const newSnap = await newDB.ref(NEW_KEYS.accounts + "/" + newName).once("value");
-      if (newSnap.exists()) { alert("That username is taken."); return; }
-      try {
-        renamingFlag = true;
-        await newDB.ref(NEW_KEYS.accounts + "/" + currentUser).remove();
-        await newDB.ref(NEW_KEYS.accounts + "/" + newName).set({
-          passwordHash: currentUserPassHash,
-          createdAt: currentData.createdAt,
-          lastRenamed: now,
-          clientVersion: NEW_CLIENT_VERSION
-        });
-        newDB.ref(NEW_KEYS.typing + "/" + currentUser).remove();
-        currentUser = newName;
-        localStorage.setItem("acc_username", currentUser);
-        if (userPresenceRef) { userPresenceRef.update({ username: newName }); }
-        alert("Renamed to " + newName);
-        renamingFlag = false;
-        refreshAccountInterface();
-      } catch(e) { renamingFlag = false; alert("Error renaming: " + e); }
+      accountsRef.child(newName).once("value").then(snapshot => {
+        if (snapshot.exists()) {
+          alert("Username already taken.");
+        } else {
+          accountsRef.child(newName).set({
+            ...accountData,
+            passwordHash: accountData.passwordHash
+          }, error => {
+            if (error) alert("Error updating username: " + error);
+            else {
+              accountsRef.child(currentUser).remove();
+              currentUser = newName;
+              accountData = { ...accountData };
+              document.getElementById("currentAcc").textContent = currentUser;
+              accountsRef.child(currentUser).update(accountData);
+              localStorage.setItem("currentUser", currentUser);
+              localStorage.setItem("accountData", JSON.stringify(accountData));
+              alert("Username changed to " + currentUser);
+            }
+          });
+        }
+      });
     }
-
-    async function updateUserPassword() {
-      if (!currentUser || !currentUserPassHash) { alert("Not logged in, cannot change password."); return; }
-      const newPass = document.getElementById("changePassInput").value.trim();
-      if (!newPass) { alert("Enter a new password."); return; }
+    
+    function changePassword() {
+      const newPass = prompt("Enter new password:");
+      if (!newPass) return;
       const newHash = sha256(newPass);
-      try {
-        await newDB.ref(NEW_KEYS.accounts + "/" + currentUser).update({
-          passwordHash: newHash,
-          clientVersion: NEW_CLIENT_VERSION
-        });
-        currentUserPassHash = newHash;
-        localStorage.setItem("acc_passHash", newHash);
-        alert("Password changed successfully!");
-        document.getElementById("changePassInput").value = "";
-      } catch(e) { alert("Error changing password: " + e); }
-    }
-
-    function initiateChatSession() {
-      if (!currentUser) {
-        const anonName = document.getElementById("anonymousInput").value.trim();
-        if (!anonName) { alert("Enter a name or create an account."); return; }
-        if (anonName.length > maxUsernameLength) {
-          alert("Anonymous names can be at most " + maxUsernameLength + " characters long.");
-          return;
-        }
-        if (/\s/.test(anonName)) { alert("Usernames cannot contain spaces."); return; }
-        currentUser = anonName;
-      }
-      document.getElementById("loginDiv").style.display = "none";
-      document.getElementById("chatDiv").style.display = "block";
-      document.getElementById("messageInput").focus();
-      refreshDMInterface();
-      initializeUserPresence();
-    }
-
-    function goBackToMainScreen() {
-      clearUserTypingStatus();
-      if (userPresenceRef) { userPresenceRef.remove(); userPresenceRef = null; }
-      document.getElementById("chatDiv").style.display = "none";
-      document.getElementById("loginDiv").style.display = "block";
-    }
-
-    function filterForbiddenWords(text) {
-      let filteredText = text;
-      forbiddenWords.forEach(word => {
-        const regex = new RegExp("\\b" + word + "\\b", "gi");
-        filteredText = filteredText.replace(regex, "****");
-      });
-      return filteredText;
-    }
-
-    function renderChatMessage(user, text, isAccount, isBroadcast, msgKey, timestamp) {
-      const ul = document.getElementById("messages");
-      const li = document.createElement("li");
-      li.classList.add("message-enter");
-      if (msgKey) { li.setAttribute("data-key", msgKey); }
-      if (user) { li.setAttribute("data-user", user); }
-      
-      let titlePrefix = "";
-      if (isAccount && userTitles[user] && userTitles[user].equipped) {
-        titlePrefix = "[" + userTitles[user].equipped + "] ";
-      }
-      
-      let userColorClass = isAccount ? "account-user" : "anonymous-user";
-      let colorStyle = "";
-      if (userColors[user]) { colorStyle = `style="color:${userColors[user]}; font-weight:bold;"`; }
-      else if (isAccount) { colorStyle = `style="color:#7289da;"`; }
-      
-      if (isBroadcast) {
-        li.innerHTML = `<span class="broadcast-msg">[BROADCAST from ${user}]</span> ${text}`;
-      } else {
-        li.innerHTML = `<span class="${userColorClass}" ${colorStyle}>${titlePrefix}${user}</span>: ${text}`;
-      }
-      ul.appendChild(li);
-      ul.scrollTop = ul.scrollHeight;
-    }
-
-    function loadUserTitles(userStats) {}
-
-    function updateLeaderboardRankings(callback) {
-      newDB.ref(NEW_KEYS.stats).once("value").then(function(snapshot) {
-        const stats = snapshot.val() || {};
-        const rpsArray = [];
-        const duelsArray = [];
-        const overallArray = [];
-        for (const username in stats) {
-          const userStats = stats[username];
-          const rpsWins = (userStats.rps && userStats.rps.wins) ? userStats.rps.wins : 0;
-          const duelsWins = (userStats.duels && userStats.duels.wins) ? userStats.duels.wins : 0;
-          const overallWins = rpsWins + duelsWins;
-          rpsArray.push({ username, wins: rpsWins });
-          duelsArray.push({ username, wins: duelsWins });
-          overallArray.push({ username, wins: overallWins });
-        }
-        rpsArray.sort((a, b) => b.wins - a.wins);
-        duelsArray.sort((a, b) => b.wins - a.wins);
-        overallArray.sort((a, b) => b.wins - a.wins);
-        currentUserIsTop3RPS = rpsArray.slice(0,3).some(entry => entry.username === currentUser);
-        currentUserIsTop3Duels = duelsArray.slice(0,3).some(entry => entry.username === currentUser);
-        currentUserIsTop3Overall = overallArray.slice(0,3).some(entry => entry.username === currentUser);
-        if (callback) callback();
-      });
-    }
-
-    function dispatchMessage() {
-      const inp = document.getElementById("messageInput");
-      let text = inp.value.trim();
-      if (!text) return;
-      if (text.startsWith("/")) {
-        processCommandInput(text);
-        inp.value = "";
-        inp.style.height = "40px";
-        return;
-      }
-      if (text.length > maxMessageLength) {
-        alert("Your message can be at most " + maxMessageLength + " characters long.");
-        return;
-      }
-      const nowTime = Date.now();
-      if (nowTime - lastMsgTimestamp < RATE_LIMIT) {
-        const secRemain = Math.ceil((RATE_LIMIT - (nowTime - lastMsgTimestamp)) / 1000);
-        alert(`Wait ${secRemain} second(s).`);
-        return;
-      }
-      if (currentUser && mutedList[currentUser]) {
-        alert("You are muted and cannot send messages.");
-        inp.value = "";
-        inp.style.height = "40px";
-        return;
-      }
-      text = filterForbiddenWords(text);
-      let finalName = currentUser || "Unknown";
-      const isAcc = (currentUser && currentUserPassHash);
-      if (inGroupChatMode && activeGroupRoom) {
-        newDB.ref(NEW_KEYS.groupRooms + "/" + activeGroupRoom + "/messages").push({
-          user: finalName,
-          text: text,
-          timestamp: firebase.database.ServerValue.TIMESTAMP,
-          clientVersion: NEW_CLIENT_VERSION
-        });
-      } else {
-        newDB.ref(NEW_KEYS.messages).push({
-          user: finalName,
-          text: text,
-          isAccount: isAcc,
-          timestamp: firebase.database.ServerValue.TIMESTAMP,
-          clientVersion: NEW_CLIENT_VERSION
-        });
-      }
-      inp.value = "";
-      inp.style.height = "40px";
-      lastMsgTimestamp = nowTime;
-      if (currentUser) { newDB.ref(NEW_KEYS.typing + "/" + currentUser).remove(); }
-    }
-
-    function eraseChatDisplay() {
-      if (confirm("Are you sure you want to clear the chat messages on your screen?")) {
-        document.getElementById("messages").innerHTML = "";
-      }
-    }
-
-    function processTypingIndicator() {
-      if (!currentUser) return;
-      newDB.ref(NEW_KEYS.typing + "/" + currentUser).set(true, function() {
-        newDB.ref(NEW_KEYS.typing + "/" + currentUser).update({ clientVersion: NEW_CLIENT_VERSION });
-      });
-      if (typingTimer) clearTimeout(typingTimer);
-      typingTimer = setTimeout(() => { newDB.ref(NEW_KEYS.typing + "/" + currentUser).remove(); }, 3000);
-    }
-
-    function presentTypingStatus(typingObj) {
-      const others = Object.keys(typingObj).filter(u => u !== currentUser);
-      const typingDiv = document.getElementById("typingStatus");
-      if (others.length === 0) { typingDiv.textContent = ""; }
-      else if (others.length === 1) { typingDiv.textContent = `${others[0]} is typing...`; }
-      else { typingDiv.textContent = `${others.join(", ")} are typing...`; }
-    }
-
-    function refreshDMInterface() {
-      const warn = document.getElementById("dmLoginWarning");
-      const dmUI = document.getElementById("dmUI");
-      if (currentUser && currentUserPassHash) { warn.style.display = "none"; dmUI.style.display = "block"; }
-      else { warn.style.display = "block"; dmUI.style.display = "none"; }
-    }
-
-    function launchDMChannel1() {
-      const target = document.getElementById("dmTargetInput").value.trim();
-      if (!target) { alert("Please type a username to DM."); return; }
-      if (!currentUser || !currentUserPassHash) { alert("You must be logged in to DM."); return; }
-      if (dmListener1 && currentDMChannel) { newDB.ref(currentDMChannel).off("child_added", dmListener1); }
-      const userA = currentUser;
-      const userB = target;
-      const dmKey = (userA < userB) ? (userA + "_" + userB) : (userB + "_" + userA);
-      currentDMChannel = NEW_KEYS.dms + "/" + dmKey;
-      document.getElementById("dmMessages").innerHTML = "";
-      document.getElementById("dmConversation").style.display = "block";
-      document.getElementById("dmMessageInput").focus();
-      dmListener1 = newDB.ref(currentDMChannel).on("child_added", (snap) => {
-        const val = snap.val();
-        renderDMChannel1Message(val.user, val.text);
-        if (val.user !== currentUser) {
-          displayDMAlert(val.user, val.text);
-          triggerSoundAlert();
+      accountsRef.child(currentUser).update({ passwordHash: newHash }, error => {
+        if (error) alert("Error changing password: " + error);
+        else {
+          accountData.passwordHash = newHash;
+          localStorage.setItem("accountData", JSON.stringify(accountData));
+          alert("Password changed successfully!");
         }
       });
     }
-
-    function renderDMChannel1Message(sender, text) {
-      const ul = document.getElementById("dmMessages");
-      const li = document.createElement("li");
-      li.textContent = `${sender}: ${text}`;
-      li.classList.add("message-enter");
-      ul.appendChild(li);
-      ul.scrollTop = ul.scrollHeight;
+    
+    function logoutAccount() {
+      currentUser = null;
+      accountData = null;
+      serverList = [];
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("accountData");
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("accountInfo").style.display = "none";
+      document.getElementById("accUsername").value = "";
+      document.getElementById("accPassword").value = "";
+      document.getElementById("chatWrapper").style.display = "none";
+      document.getElementById("mainMenu").style.display = "block";
     }
 
-    function transmitDMChannel1() {
-      if (!currentDMChannel) { alert("No DM open. Type a username and 'Open DM' first."); return; }
-      const inp = document.getElementById("dmMessageInput");
-      let text = inp.value.trim();
-      if (!text) return;
-      text = filterForbiddenWords(text);
-      if (currentUser && mutedList[currentUser]) {
-        alert("You are muted and cannot send messages.");
-        inp.value = "";
-        inp.style.height = "40px";
-        return;
-      }
-      const finalName = currentUser || "Unknown";
-      newDB.ref(currentDMChannel).push({
-        user: finalName,
-        text: text,
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        clientVersion: NEW_CLIENT_VERSION
-      });
-      inp.value = "";
-      inp.style.height = "40px";
+    /*********************** Chat & Server List Functions ************************/
+    function startChat() {
+      document.getElementById("mainMenu").style.display = "none";
+      document.getElementById("chatWrapper").style.display = "flex";
+      currentServer = { type: "public", id: "public", name: "Public Chat" };
+      updateServerListUI();
+      switchServer(currentServer);
+      let myPresenceRef = presenceRef.push();
+      myPresenceRef.set({ username: currentUser });
+      myPresenceRef.onDisconnect().remove();
+      presenceRef.on("value", updateMemberList);
+      listenForDMs();
+      listenForGroupRooms();
     }
-
-    function launchDMChannel2() {
-      const target = document.getElementById("dm2TargetInput").value.trim();
-      if (!target) { alert("Please type a username to DM (DM #2)."); return; }
-      if (!currentUser || !currentUserPassHash) { alert("You must be logged in to DM."); return; }
-      if (dmListener2 && currentDMChannel2) { newDB.ref(currentDMChannel2).off("child_added", dmListener2); }
-      const userA = currentUser;
-      const userB = target;
-      const dmKey = (userA < userB) ? (userA + "_" + userB) : (userB + "_" + userA);
-      currentDMChannel2 = NEW_KEYS.dms + "/" + dmKey;
-      document.getElementById("dm2Messages").innerHTML = "";
-      document.getElementById("dm2Conversation").style.display = "block";
-      document.getElementById("dm2MessageInput").focus();
-      dmListener2 = newDB.ref(currentDMChannel2).on("child_added", (snap) => {
-        const val = snap.val();
-        renderDMChannel2Message(val.user, val.text);
-        if (val.user !== currentUser) {
-          displayDMAlert(val.user, val.text);
-          triggerSoundAlert();
-        }
-      });
-    }
-
-    function renderDMChannel2Message(sender, text) {
-      const ul = document.getElementById("dm2Messages");
-      const li = document.createElement("li");
-      li.textContent = `${sender}: ${text}`;
-      li.classList.add("message-enter");
-      ul.appendChild(li);
-      ul.scrollTop = ul.scrollHeight;
-    }
-
-    function transmitDMChannel2() {
-      if (!currentDMChannel2) { alert("No DM #2 open. Type a username and 'Open DM #2' first."); return; }
-      const inp = document.getElementById("dm2MessageInput");
-      let text = inp.value.trim();
-      if (!text) return;
-      text = filterForbiddenWords(text);
-      if (currentUser && mutedList[currentUser]) {
-        alert("You are muted and cannot send messages.");
-        inp.value = "";
-        inp.style.height = "40px";
-        return;
-      }
-      const finalName = currentUser || "Unknown";
-      newDB.ref(currentDMChannel2).push({
-        user: finalName,
-        text: text,
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        clientVersion: NEW_CLIENT_VERSION
-      });
-      inp.value = "";
-      inp.style.height = "40px";
-    }
-
-    function launchDMChannel3() {
-      const target = document.getElementById("dm3TargetInput").value.trim();
-      if (!target) { alert("Please type a username to DM (DM #3)."); return; }
-      if (!currentUser || !currentUserPassHash) { alert("You must be logged in to DM."); return; }
-      if (dmListener3 && currentDMChannel3) { newDB.ref(currentDMChannel3).off("child_added", dmListener3); }
-      const userA = currentUser;
-      const userB = target;
-      const dmKey = (userA < userB) ? (userA + "_" + userB) : (userB + "_" + userA);
-      currentDMChannel3 = NEW_KEYS.dms + "/" + dmKey;
-      document.getElementById("dm3Messages").innerHTML = "";
-      document.getElementById("dm3Conversation").style.display = "block";
-      document.getElementById("dm3MessageInput").focus();
-      dmListener3 = newDB.ref(currentDMChannel3).on("child_added", (snap) => {
-        const val = snap.val();
-        renderDMChannel3Message(val.user, val.text);
-        if (val.user !== currentUser) {
-          displayDMAlert(val.user, val.text);
-          triggerSoundAlert();
-        }
-      });
-    }
-
-    function renderDMChannel3Message(sender, text) {
-      const ul = document.getElementById("dm3Messages");
-      const li = document.createElement("li");
-      li.textContent = `${sender}: ${text}`;
-      li.classList.add("message-enter");
-      ul.appendChild(li);
-      ul.scrollTop = ul.scrollHeight;
-    }
-
-    function transmitDMChannel3() {
-      if (!currentDMChannel3) { alert("No DM #3 open. Type a username and 'Open DM' first."); return; }
-      const inp = document.getElementById("dm3MessageInput");
-      let text = inp.value.trim();
-      if (!text) return;
-      text = filterForbiddenWords(text);
-      if (currentUser && mutedList[currentUser]) {
-        alert("You are muted and cannot send messages.");
-        inp.value = "";
-        inp.style.height = "40px";
-        return;
-      }
-      const finalName = currentUser || "Unknown";
-      newDB.ref(currentDMChannel3).push({
-        user: finalName,
-        text: text,
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        clientVersion: NEW_CLIENT_VERSION
-      });
-      inp.value = "";
-      inp.style.height = "40px";
-    }
-
-    async function processCommandInput(inputText) {
-      const parts = inputText.split(" ");
-      const command = parts[0].toLowerCase();
-      const argument = parts[1] ? parts[1].trim() : null;
-      if (command === "/mute" || command === "/unmute" || command === "/terminate") {
-        if (!isUserOP()) {
-          alert("Unauthorized op command detected. Your account will be terminated.");
-          securelyTerminateAccount(currentUser);
-          return;
-        }
-        if (command === "/mute") { securelyMuteUser(argument); return; }
-        else if (command === "/unmute") { securelyUnmuteUser(argument); return; }
-        else if (command === "/terminate") { if (!argument) { alert("Usage: /terminate [accountName]"); } else { securelyTerminateAccount(argument); } return; }
-      }
-      if (command === "/duelspeed") {
-         if (!argument) { alert("Usage: /duelspeed [account]"); return; }
-         startDuelSpeedContest(argument);
-         return;
-      }
-      if (command === "/rps") {
-         if (!argument) { alert("Usage: /rps [account]"); return; }
-         startRPSContest(argument);
-         return;
-      }
-      if (command === "/accept") {
-         if (pendingDuelContest) { approveDuelSpeedContest(); return; }
-         else if (pendingRPSContest) { approveRPSContest(); return; }
-         else { alert("No pending challenge to accept."); }
-      }
-      if (command === "/decline") {
-         if (pendingDuelContest) { rejectDuelSpeedContest(); return; }
-         else if (pendingRPSContest) { rejectRPSContest(); return; }
-         else { alert("No pending challenge to decline."); }
-      }
-      switch(command) {
-        case "/createroom":
-          if (!argument) { alert("Usage: /createroom [roomName]"); return; }
-          await createGroupRoom(argument);
-          break;
-        case "/join":
-          if (!argument) { alert("Usage: /join [roomName]"); return; }
-          await joinGroupRoom(argument);
-          break;
-        case "/invite":
-          if (!argument) { alert("Usage: /invite [accountName]"); return; }
-          await inviteToGroupRoom(argument);
-          break;
-        case "/leave":
-          leaveGroupRoom();
-          break;
-        default:
-          alert("Unknown command.");
-      }
-    }
-
-    function startDuelSpeedContest(targetUser) {
-      if (!currentUser) { alert("Login required to challenge."); return; }
-      if (targetUser.toLowerCase() === currentUser.toLowerCase()) { alert("Cannot challenge yourself!"); return; }
-      let gameID = newDB.ref(NEW_KEYS.duelSpeedGames).push().key;
-      let contestData = {
-         challenger: currentUser,
-         challenged: targetUser,
-         status: "pending",
-         gameId: gameID,
-         timestamp: firebase.database.ServerValue.TIMESTAMP,
-         clientVersion: NEW_CLIENT_VERSION
-      };
-      newDB.ref(NEW_KEYS.duelSpeedChallenges + "/" + gameID).set(contestData);
-      alert("Duel Speed challenge sent to " + targetUser + "!");
-    }
-
-    function monitorDuelSpeedContests() {
-      newDB.ref(NEW_KEYS.duelSpeedChallenges).on("child_added", function(snap) {
-         let contest = snap.val();
-         if (contest.challenged.toLowerCase() === currentUser.toLowerCase() && contest.status === "pending") {
-            if (!pendingDuelContest) {
-              pendingDuelContest = contest;
-              alert(contest.challenger + " has challenged you to Duel Speed! Type /accept to accept or /decline to decline.");
-            }
-         }
-      });
-      newDB.ref(NEW_KEYS.duelSpeedChallenges).on("child_changed", function(snap) {
-         let contest = snap.val();
-         if (contest.challenged.toLowerCase() === currentUser.toLowerCase() && contest.status === "pending") {
-            if (!pendingDuelContest) {
-              pendingDuelContest = contest;
-              alert(contest.challenger + " has challenged you to Duel Speed! Type /accept to accept or /decline to decline.");
-            }
-         }
-         if (contest.challenger.toLowerCase() === currentUser.toLowerCase() && contest.status === "accepted") {
-            acceptedDuelContest = contest;
-            beginDuelSpeedMatch(contest.gameId, contest.challenger, contest.challenged);
-         }
-      });
-    }
-
-    function approveDuelSpeedContest() {
-      if (!pendingDuelContest) { alert("No pending Duel Speed challenge."); return; }
-      let gameID = pendingDuelContest.gameId;
-      newDB.ref(NEW_KEYS.duelSpeedChallenges + "/" + gameID).update({ status: "accepted", clientVersion: NEW_CLIENT_VERSION });
-      beginDuelSpeedMatch(gameID, pendingDuelContest.challenger, pendingDuelContest.challenged);
-      pendingDuelContest = null;
-    }
-
-    function rejectDuelSpeedContest() {
-      if (!pendingDuelContest) { alert("No pending Duel Speed challenge."); return; }
-      let gameID = pendingDuelContest.gameId;
-      newDB.ref(NEW_KEYS.duelSpeedChallenges + "/" + gameID).remove();
-      pendingDuelContest = null;
-      alert("Duel Speed challenge declined.");
-    }
-
-    function beginDuelSpeedMatch(gameID, playerOne, playerTwo) {
-      document.getElementById("chatDiv").style.display = "none";
-      document.getElementById("duelSpeedGameDiv").style.display = "block";
-      duelGameID = gameID;
-      duelGameRef = newDB.ref(NEW_KEYS.duelSpeedGames + "/" + gameID);
-      duelGameRef.once("value", function(snap) {
-         if (!snap.exists()) {
-            duelGameRef.set({
-               players: {
-                   [playerOne]: { clicks: 0 },
-                   [playerTwo]: { clicks: 0 }
-               },
-               status: "countdown",
-               countdown: 3,
-               clientVersion: NEW_CLIENT_VERSION
-            });
-         }
-         initializeDuelSpeedMatch(gameID, playerOne, playerTwo);
-      });
-      newDB.ref(NEW_KEYS.duelSpeedChallenges + "/" + gameID).remove();
-    }
-
-    function initializeDuelSpeedMatch(gameID, playerOne, playerTwo) {
-      isDuelHost = (currentUser.toLowerCase() === playerOne.toLowerCase());
-      duelGameRef.on("value", function(snap) {
-         let gameData = snap.val();
-         if (!gameData) return;
-         if (gameData.status === "countdown") {
-            document.getElementById("duelSpeedStatus").textContent = "Starting in " + gameData.countdown + "...";
-            document.getElementById("duelSpeedClickButton").disabled = true;
-         } else if (gameData.status === "playing") {
-            document.getElementById("duelSpeedStatus").textContent = "Go!";
-            document.getElementById("duelSpeedClickButton").disabled = false;
-         } else if (gameData.status === "ended") {
-            document.getElementById("duelSpeedStatus").textContent = gameData.winner + " wins!";
-            document.getElementById("duelSpeedClickButton").disabled = true;
-            setTimeout(() => {
-              document.getElementById("duelSpeedGameDiv").style.display = "none";
-              document.getElementById("chatDiv").style.display = "block";
-              document.getElementById("messageInput").focus();
-            }, 3000);
-         }
-         document.getElementById("player1Counter").textContent = playerOne + ": " + (gameData.players[playerOne].clicks || 0) + " clicks";
-         document.getElementById("player2Counter").textContent = playerTwo + ": " + (gameData.players[playerTwo].clicks || 0) + " clicks";
-         if (gameData.status === "playing" && isDuelHost) {
-            if (gameData.players[playerOne].clicks >= 100) {
-              duelGameRef.child("statsUpdated").once("value", function(snap) {
-                if (!snap.exists() || !snap.val()) {
-                  grantDuelSpeedWin(playerOne, playerTwo);
-                  duelGameRef.update({ statsUpdated: true, status: "ended", winner: playerOne, clientVersion: NEW_CLIENT_VERSION });
-                }
-              });
-            } else if (gameData.players[playerTwo].clicks >= 100) {
-              duelGameRef.child("statsUpdated").once("value", function(snap) {
-                if (!snap.exists() || !snap.val()) {
-                  grantDuelSpeedWin(playerTwo, playerOne);
-                  duelGameRef.update({ statsUpdated: true, status: "ended", winner: playerTwo, clientVersion: NEW_CLIENT_VERSION });
-                }
-              });
-            }
-         }
-      });
-      if (isDuelHost) {
-         duelCountdownInterval = setInterval(() => {
-            duelGameRef.once("value", function(snap) {
-               let gameData = snap.val();
-               if (gameData.status === "countdown") {
-                  if (gameData.countdown > 0) {
-                     duelGameRef.update({ countdown: gameData.countdown - 1, clientVersion: NEW_CLIENT_VERSION });
-                  } else {
-                     duelGameRef.update({ status: "playing", clientVersion: NEW_CLIENT_VERSION });
-                     clearInterval(duelCountdownInterval);
-                  }
-               }
-            });
-         }, 1000);
-      }
-    }
-
-    function recordDuelSpeedClick() {
-      duelGameRef.once("value", function(snap) {
-         let gameData = snap.val();
-         if (gameData.status !== "playing") return;
-         let playerKey = Object.keys(gameData.players).find(key => key.toLowerCase() === currentUser.toLowerCase());
-         if (playerKey) {
-           let playerRef = duelGameRef.child("players/" + playerKey + "/clicks");
-           playerRef.transaction(function(currentClicks) { return (currentClicks || 0) + 1; });
-         }
-      });
-    }
-
-    function startRPSContest(targetUser) {
-      if (!currentUser) { alert("Login required to challenge."); return; }
-      if (targetUser.toLowerCase() === currentUser.toLowerCase()) { alert("Cannot challenge yourself!"); return; }
-      let gameID = newDB.ref(NEW_KEYS.rpsGames).push().key;
-      let contestData = {
-         challenger: currentUser,
-         challenged: targetUser,
-         status: "pending",
-         gameId: gameID,
-         timestamp: firebase.database.ServerValue.TIMESTAMP,
-         clientVersion: NEW_CLIENT_VERSION
-      };
-      newDB.ref(NEW_KEYS.rpsChallenges + "/" + gameID).set(contestData);
-      alert("Rock–Paper–Scissors challenge sent to " + targetUser + "!");
-    }
-
-    function monitorRPSContests() {
-      newDB.ref(NEW_KEYS.rpsChallenges).on("child_added", function(snap) {
-         let contest = snap.val();
-         if (contest.challenged.toLowerCase() === currentUser.toLowerCase() && contest.status === "pending") {
-            if (!pendingRPSContest) {
-              pendingRPSContest = contest;
-              alert(contest.challenger + " has challenged you to Rock–Paper–Scissors! Type /accept to accept or /decline to decline.");
-            }
-         }
-      });
-      newDB.ref(NEW_KEYS.rpsChallenges).on("child_changed", function(snap) {
-         let contest = snap.val();
-         if (contest.challenged.toLowerCase() === currentUser.toLowerCase() && contest.status === "pending") {
-            if (!pendingRPSContest) {
-              pendingRPSContest = contest;
-              alert(contest.challenger + " has challenged you to Rock–Paper–Scissors! Type /accept to accept or /decline to decline.");
-            }
-         }
-         if (contest.challenger.toLowerCase() === currentUser.toLowerCase() && contest.status === "accepted") {
-            acceptedRPSContest = contest;
-            beginRPSMatch(contest.gameId, contest.challenger, contest.challenged);
-         }
-      });
-    }
-
-    function approveRPSContest() {
-      if (!pendingRPSContest) { alert("No pending Rock–Paper–Scissors challenge."); return; }
-      let gameID = pendingRPSContest.gameId;
-      newDB.ref(NEW_KEYS.rpsChallenges + "/" + gameID).update({ status: "accepted", clientVersion: NEW_CLIENT_VERSION });
-      beginRPSMatch(gameID, pendingRPSContest.challenger, pendingRPSContest.challenged);
-      pendingRPSContest = null;
-    }
-
-    function rejectRPSContest() {
-      if (!pendingRPSContest) { alert("No pending Rock–Paper–Scissors challenge."); return; }
-      let gameID = pendingRPSContest.gameId;
-      newDB.ref(NEW_KEYS.rpsChallenges + "/" + gameID).remove();
-      pendingRPSContest = null;
-      alert("Rock–Paper–Scissors challenge declined.");
-    }
-
-    function beginRPSMatch(gameID, playerOne, playerTwo) {
-      document.getElementById("chatDiv").style.display = "none";
-      document.getElementById("rpsGameDiv").style.display = "block";
-      rpsPlayerOne = playerOne;
-      rpsPlayerTwo = playerTwo;
-      rpsGameID = gameID;
-      rpsGameRef = newDB.ref(NEW_KEYS.rpsGames + "/" + gameID);
-      rpsGameRef.once("value", function(snap) {
-         if (!snap.exists()) {
-            rpsGameRef.set({
-               players: {
-                   [playerOne]: { choice: "" },
-                   [playerTwo]: { choice: "" }
-               },
-               status: "waiting",
-               clientVersion: NEW_CLIENT_VERSION
-            });
-         }
-         initializeRPSMatch(gameID, playerOne, playerTwo);
-      });
-      newDB.ref(NEW_KEYS.rpsChallenges + "/" + gameID).remove();
-    }
-
-    function initializeRPSMatch(gameID, playerOne, playerTwo) {
-      isRPSHost = (currentUser.toLowerCase() === playerOne.toLowerCase());
-      rpsGameRef.on("value", function(snap) {
-         let gameData = snap.val();
-         if (!gameData) return;
-         let choice1 = gameData.players[playerOne].choice;
-         let choice2 = gameData.players[playerTwo].choice;
-         if (choice1 !== "" && choice2 !== "" && gameData.status === "waiting") {
-            let emoji1 = getRPSEmoji(choice1);
-            let emoji2 = getRPSEmoji(choice2);
-            let resultStr = "";
-            let winner = null;
-            if (choice1 === choice2) {
-               resultStr = "It's a tie! Both chose " + choice1 + " " + emoji1 + ".";
-            } else if ((choice1 === "rock" && choice2 === "scissors") ||
-                       (choice1 === "scissors" && choice2 === "paper") ||
-                       (choice1 === "paper" && choice2 === "rock")) {
-               resultStr = playerOne + " wins! " + choice1 + " " + emoji1 + " beats " + choice2 + " " + emoji2 + ".";
-               winner = playerOne;
-            } else {
-               resultStr = playerTwo + " wins! " + choice2 + " " + emoji2 + " beats " + choice1 + " " + emoji1 + ".";
-               winner = playerTwo;
-            }
-            rpsGameRef.child("statsUpdated").once("value", function(snap) {
-              if (!snap.exists() || !snap.val()) {
-                if (winner) {
-                  const loser = (winner === playerOne) ? playerTwo : playerOne;
-                  grantRPSWin(winner, loser);
-                }
-                rpsGameRef.update({ statsUpdated: true, status: "finished", result: resultStr, clientVersion: NEW_CLIENT_VERSION });
-              }
-            });
-         }
-         if (gameData.status === "finished") {
-            document.getElementById("rpsStatus").textContent = "Game Over";
-            document.getElementById("rpsResult").textContent = gameData.result;
-            document.getElementById("rpsChoices").style.display = "none";
-            if (!rpsGameEndTimer) {
-              rpsGameEndTimer = setTimeout(function() {
-                document.getElementById("rpsGameDiv").style.display = "none";
-                document.getElementById("chatDiv").style.display = "block";
-                document.getElementById("messageInput").focus();
-                restartRPSMatch();
-                rpsGameEndTimer = null;
-              }, 3000);
-            }
-         }
-      });
-    }
-
-    function selectRPSOption(choice) {
-      rpsGameRef.once("value", function(snap) {
-         let gameData = snap.val();
-         if (gameData.status !== "waiting") return;
-         let playerKey = Object.keys(gameData.players).find(key => key.toLowerCase() === currentUser.toLowerCase());
-         if (!playerKey) {
-           alert("Player not found in game.");
-           return;
-         }
-         if (gameData.players[playerKey].choice === "") {
-            rpsGameRef.child("players/" + playerKey + "/choice").set(choice);
-            document.getElementById("rpsStatus").textContent = "Waiting for opponent's choice...";
-         }
-      });
-    }
-
-    function restartRPSMatch() {
-      if (!rpsGameRef) return;
-      rpsGameRef.set({
-         players: {
-            [rpsPlayerOne]: { choice: "" },
-            [rpsPlayerTwo]: { choice: "" }
-         },
-         status: "waiting",
-         clientVersion: NEW_CLIENT_VERSION
-      });
-      document.getElementById("rpsStatus").textContent = "Make your choice:";
-      document.getElementById("rpsResult").textContent = "";
-      document.getElementById("rpsChoices").style.display = "block";
-      document.getElementById("rpsPlayAgainButton").style.display = "none";
-    }
-
-    function getRPSEmoji(choice) {
-      switch(choice) {
-         case "rock": return "✊";
-         case "paper": return "✋";
-         case "scissors": return "✌️";
-         default: return "";
-      }
-    }
-
-    function openSettingsPage() {
-      document.getElementById("loginDiv").style.display = "none";
-      document.getElementById("chatDiv").style.display = "none";
-      document.getElementById("settingsDiv").style.display = "block";
-      if (currentUser) {
-        newDB.ref(NEW_KEYS.stats + "/" + currentUser).once("value").then(snapshot => {
-          loadUserTitlesInSettings(snapshot.val() || {});
-        });
-      }
-    }
-
-    function returnToSettingsOrLogin() {
-      document.getElementById("settingsDiv").style.display = "none";
-      document.getElementById("loginDiv").style.display = "block";
-    }
-
-    function openLeaderboardPage() {
-      if (!currentUser || !currentUserPassHash) {
-        alert("You must be logged in to view the leaderboard.");
-        return;
-      }
-      document.getElementById("chatDiv").style.display = "none";
-      document.getElementById("settingsDiv").style.display = "none";
-      document.getElementById("leaderboardDiv").style.display = "block";
-      loadLeaderboard();
-    }
-
-    function closeLeaderboardPage() {
-      document.getElementById("leaderboardDiv").style.display = "none";
-      document.getElementById("chatDiv").style.display = "block";
-    }
-
-    function loadLeaderboard() {
-      newDB.ref(NEW_KEYS.stats).once("value").then(snapshot => {
-        const stats = snapshot.val() || {};
-        const rpsArray = [];
-        const duelsArray = [];
-        const overallArray = [];
-        for (const username in stats) {
-          const userStats = stats[username];
-          const rpsWins = (userStats.rps && userStats.rps.wins) ? userStats.rps.wins : 0;
-          const duelsWins = (userStats.duels && userStats.duels.wins) ? userStats.duels.wins : 0;
-          const overallWins = rpsWins + duelsWins;
-          rpsArray.push({ username, wins: rpsWins });
-          duelsArray.push({ username, wins: duelsWins });
-          overallArray.push({ username, wins: overallWins });
-        }
-        rpsArray.sort((a, b) => b.wins - a.wins);
-        duelsArray.sort((a, b) => b.wins - a.wins);
-        overallArray.sort((a, b) => b.wins - a.wins);
-        currentUserIsTop3RPS = rpsArray.slice(0,3).some(entry => entry.username === currentUser);
-        currentUserIsTop3Duels = duelsArray.slice(0,3).some(entry => entry.username === currentUser);
-        currentUserIsTop3Overall = overallArray.slice(0,3).some(entry => entry.username === currentUser);
-        const rpsList = document.getElementById("rpsLeaderboard");
-        const duelsList = document.getElementById("duelsLeaderboard");
-        const overallList = document.getElementById("overallLeaderboard");
-        rpsList.innerHTML = "";
-        duelsList.innerHTML = "";
-        overallList.innerHTML = "";
-        rpsArray.forEach((entry, index) => {
-          const li = document.createElement("li");
-          let titleBadge = "";
-          if (index === 0) titleBadge = " 🥇";
-          else if (index === 1) titleBadge = " 🥈";
-          else if (index === 2) titleBadge = " 🥉";
-          li.textContent = `${entry.username}${titleBadge} - ${entry.wins} wins`;
-          rpsList.appendChild(li);
-        });
-        duelsArray.forEach((entry, index) => {
-          const li = document.createElement("li");
-          let titleBadge = "";
-          if (index === 0) titleBadge = " 🥇";
-          else if (index === 1) titleBadge = " 🥈";
-          else if (index === 2) titleBadge = " 🥉";
-          li.textContent = `${entry.username}${titleBadge} - ${entry.wins} wins`;
-          duelsList.appendChild(li);
-        });
-        overallArray.forEach((entry, index) => {
-          const li = document.createElement("li");
-          let titleBadge = "";
-          if (index === 0) titleBadge = " 🥇";
-          else if (index === 1) titleBadge = " 🥈";
-          else if (index === 2) titleBadge = " 🥉";
-          li.textContent = `${entry.username}${titleBadge} - ${entry.wins} wins`;
-          overallList.appendChild(li);
-        });
-      });
-    }
-
-    function adjustGuiScaling() {
-      const scale = document.getElementById("guiSizeRange").value;
-      const container = document.querySelector('.container');
-      container.style.transform = 'scale(' + scale + ')';
-      container.style.transformOrigin = 'top center';
-      localStorage.setItem("uiScale", scale);
-      refreshGuiScaleDisplay();
-    }
-
-    function refreshGuiScaleDisplay() {
-      const val = document.getElementById("guiSizeRange").value;
-      document.getElementById("guiSizeValue").textContent = `Current Scale: ${val}x`;
-    }
-
-    function changeUIFont() {
-      document.body.classList.remove(
-        "font-arial", "font-georgia", "font-courier", "font-comic", "font-roboto",
-        "font-times", "font-verdana", "font-trebuchet", "font-lucida", "font-garamond",
-        "font-helvetica", "font-tahoma", "font-impact", "font-futura", "font-open-sans", "font-lato", "font-montserrat"
-      );
-      const selected = document.getElementById("fontSelect").value;
-      document.body.classList.add(selected);
-      localStorage.setItem("selectedFont", selected);
-    }
-
-    function switchDesktopNotifications() {
-      const toggled = document.getElementById("notificationsToggle").checked;
-      localStorage.setItem("notificationsEnabled", toggled);
-      if (toggled) { askNotificationAccess(); }
-    }
-
-    function askNotificationAccess() {
-      if (!("Notification" in window)) { alert("This browser does not support notifications."); return; }
-      if (Notification.permission !== "granted") {
-        Notification.requestPermission().then((perm) => {
-          if (perm !== "granted") { alert("Notifications blocked. Adjust settings."); document.getElementById("notificationsToggle").checked = false; localStorage.setItem("notificationsEnabled", false); }
-        });
-      }
-    }
-
-    function displayDMAlert(user, text) {
-      const notifOn = localStorage.getItem("notificationsEnabled") === "true";
-      if (!("Notification" in window) || !notifOn) return;
-      if (document.hidden && Notification.permission === "granted") {
-        new Notification("New DM from " + user, { body: text, icon: "https://via.placeholder.com/50" });
-      }
-    }
-
-    function initializeUserPresence() {
-      const connectedRef = firebase.database().ref(".info/connected");
-      connectedRef.on("value", function(snapshot) {
-        if (snapshot.val() === true) {
-          if (userPresenceRef) { 
-            userPresenceRef.remove();
-            userPresenceRef = null;
+    
+    function updateServerListUI() {
+      const listElem = document.getElementById("serverList");
+      listElem.innerHTML = "";
+      const publicDiv = document.createElement("div");
+      publicDiv.className = "server-item" + (currentServer.id === "public" ? " active" : "");
+      publicDiv.textContent = "Public Chat";
+      publicDiv.onclick = () => { switchServer({ type: "public", id: "public", name: "Public Chat" }); };
+      listElem.appendChild(publicDiv);
+      serverList.forEach(server => {
+        const item = document.createElement("div");
+        item.className = "server-item" + ((server.id === currentServer.id && server.type === currentServer.type) ? " active" : "");
+        item.textContent = server.name;
+        item.oncontextmenu = function(e) {
+          e.preventDefault();
+          if(server.type !== "public"){
+            openDeleteModal(server, e);
           }
-          const presenceName = currentUser || ("Guest_" + Math.floor(Math.random() * 10000));
-          userPresenceRef = newDB.ref(NEW_KEYS.presence).push();
-          userPresenceRef.set({
-            username: presenceName,
-            timestamp: firebase.database.ServerValue.TIMESTAMP,
-            clientVersion: NEW_CLIENT_VERSION
-          });
-          userPresenceRef.onDisconnect().remove();
-        }
+        };
+        item.onclick = () => { switchServer(server); };
+        listElem.appendChild(item);
+      });
+      const plus = document.createElement("div");
+      plus.className = "plus-button";
+      plus.textContent = "+";
+      plus.title = "Add new channel";
+      plus.onclick = openPlusModal;
+      listElem.appendChild(plus);
+    }
+    
+    function switchServer(server) {
+      currentServer = server;
+      document.getElementById("currentServerName").textContent = server.name;
+      updateServerListUI();
+      loadMessagesForCurrentServer();
+    }
+    
+    function loadMessagesForCurrentServer() {
+      if (currentMessageListener) { currentMessageListener.off(); currentMessageListener = null; }
+      document.getElementById("messages").innerHTML = "";
+      let msgRef;
+      if (currentServer.type === "public") {
+        msgRef = publicMessagesRef;
+      } else if (currentServer.type === "dm") {
+        msgRef = db.ref("dms/" + currentServer.id + "/messages");
+      } else if (currentServer.type === "group") {
+        msgRef = db.ref("groupRooms/" + currentServer.id + "/messages");
+      }
+      currentMessageListener = msgRef;
+      currentMessageListener.on("child_added", snapshot => {
+        const msg = snapshot.val();
+        displayMessage(msg.user, msg.text, msg.timestamp);
+        checkForMentions(msg.user, msg.text);
       });
     }
-
-    function refreshMemberList(members) {
-      let sortedMembers = members.filter(m => m && m.trim() !== "").map(m => {
-        if (m.toLowerCase().includes("anoynumus")) {
-          return "Anonymous Player";
-        }
-        return m;
+    
+    function sendMessage() {
+      const text = document.getElementById("messageInput").value.trim();
+      if (!text) return;
+      if (text.length > MAX_MESSAGE) { alert("Message can be at most 100 characters."); return; }
+      let msgRef;
+      if (currentServer.type === "public") {
+        msgRef = publicMessagesRef;
+      } else if (currentServer.type === "dm") {
+        msgRef = db.ref("dms/" + currentServer.id + "/messages");
+      } else if (currentServer.type === "group") {
+        msgRef = db.ref("groupRooms/" + currentServer.id + "/messages");
+      }
+      msgRef.push({
+        user: currentUser,
+        text: text,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
       });
-      sortedMembers = [...new Set(sortedMembers)];
-      sortedMembers.sort((a, b) => a.localeCompare(b));
-      
-      const memberListUl = document.getElementById("memberList");
-      memberListUl.innerHTML = "";
-      sortedMembers.forEach(member => {
+      document.getElementById("messageInput").value = "";
+    }
+    
+    function displayMessage(user, text, timestamp) {
+      const li = document.createElement("li");
+      li.textContent = user + ": " + text;
+      if(timestamp){
+        li.title = new Date(timestamp).toLocaleString();
+      }
+      document.getElementById("messages").appendChild(li);
+      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+    }
+    
+    function updateMemberList(snapshot) {
+      const members = [];
+      snapshot.forEach(child => {
+        const data = child.val();
+        if (data.username) members.push(data.username);
+      });
+      const uniqueMembers = [...new Set(members)];
+      const listElem = document.getElementById("memberList");
+      listElem.innerHTML = "";
+      uniqueMembers.forEach(member => {
         const li = document.createElement("li");
-        li.className = "member-item";
-        const avatar = document.createElement("div");
-        avatar.className = "member-avatar";
-        avatar.textContent = member.charAt(0).toUpperCase();
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "member-name";
-        nameSpan.textContent = member;
-        li.appendChild(avatar);
-        li.appendChild(nameSpan);
-        li.onclick = function() { showProfileModal(member); };
-        memberListUl.appendChild(li);
+        li.textContent = member;
+        listElem.appendChild(li);
       });
-      const memberCountHeader = document.getElementById("memberListHeader");
-      if (memberCountHeader) { 
-        memberCountHeader.textContent = "Members Online";
-      }
+    }
+    
+    function returnToMainMenu() {
+      document.getElementById("chatWrapper").style.display = "none";
+      document.getElementById("mainMenu").style.display = "block";
     }
 
-    function filterMemberList() {
-      const filterValue = document.getElementById("memberListFilter").value.toLowerCase();
-      const items = document.querySelectorAll("#memberList li.member-item");
-      items.forEach(item => {
-        const name = item.querySelector(".member-name").textContent.toLowerCase();
-        if (name.includes(filterValue)) {
-          item.style.display = "";
-        } else {
-          item.style.display = "none";
+    /*********************** Channel (DM/Group) Functions ************************/
+    function listenForDMs() {
+      dmsRef.on("child_added", snapshot => {
+        const dmData = snapshot.val();
+        const dmKey = snapshot.key;
+        if (dmData.participants && dmData.participants.includes(currentUser)) {
+          if(accountData.channels && accountData.channels[dmKey]) return;
+          if (!serverList.some(s => s.type === "dm" && s.id === dmKey)) {
+            const other = dmData.participants.filter(u => u !== currentUser)[0] || "DM";
+            const channel = { type: "dm", id: dmKey, name: "DM: " + other };
+            serverList.push(channel);
+            updateServerListUI();
+          }
         }
       });
     }
-
-    function clearMemberList() {
-      newDB.ref(NEW_KEYS.presence).remove()
-        .then(() => {
-          alert("Members list cleared from the server.");
-        })
-        .catch((error) => {
-          alert("Error clearing members list: " + error);
-        });
-    }
-
-    function switchBackgroundMusic() {
-      const bgAudio = document.getElementById("bgMusic");
-      if (bgAudio.paused) { bgAudio.play(); } else { bgAudio.pause(); }
-    }
-
-    function modifyMusicVolume() {
-      const vol = document.getElementById("musicVolume").value;
-      const bgAudio = document.getElementById("bgMusic");
-      bgAudio.volume = vol;
-      localStorage.setItem("musicVolume", vol);
-    }
-
-    function removeBackgroundMusic() {
-      const bgAudio = document.getElementById("bgMusic");
-      bgAudio.pause();
-      bgAudio.src = "";
-      localStorage.removeItem("bgMusic");
-      alert("Background music removed!");
-    }
-
-    function switchSoundAlerts() {
-      const enabled = document.getElementById("soundToggle").checked;
-      localStorage.setItem("soundNotificationsEnabled", enabled);
-    }
-
-    function modifySoundVolume() {
-      const vol = document.getElementById("soundVolume").value;
-      const chatAud = document.getElementById("chatSound");
-      chatAud.volume = vol;
-      localStorage.setItem("soundVolume", vol);
-    }
-
-    function triggerSoundAlert() {
-      const soundEnabled = localStorage.getItem("soundNotificationsEnabled") === "true";
-      if (soundEnabled) { const chatAud = document.getElementById("chatSound"); chatAud.currentTime = 0; chatAud.play(); }
-    }
-
-    function switchTimestampDisplay() {
-      const show = document.getElementById("timestampToggle").checked;
-      localStorage.setItem("showTimestamps", show);
-      alert("Message timestamp display " + (show ? "enabled" : "disabled") + ". (Hover over messages to see the sent time.)");
-    }
-
-    function hideChangeLog() { document.getElementById("changelogOverlay").style.display = "none"; }
-    function displayHelpWindow() { document.getElementById("helpModal").style.display = "flex"; updateHelpWindowVisibility(); }
-    function hideHelpWindow() { document.getElementById("helpModal").style.display = "none"; }
-    function updateHelpWindowVisibility() {
-      var opHelpElem = document.getElementById("opHelp");
-      if (isUserOP()) { opHelpElem.style.display = "block"; }
-      else { opHelpElem.style.display = "none"; }
-    }
-
-    function showProfileModal(username) {
-      document.getElementById("profileUsername").textContent = "Profile: " + username;
-      let rank = "Member";
-      if (opList && opList[username.toLowerCase()]) {
-        rank = "OP";
-      }
-      document.getElementById("profileRank").textContent = "Rank: " + rank;
-      newDB.ref(NEW_KEYS.stats + "/" + username).once("value").then(snapshot => {
-        let stats = snapshot.val() || {};
-        let rps = stats.rps || { wins: 0, losses: 0 };
-        let duels = stats.duels || { wins: 0, losses: 0 };
-        document.getElementById("profileRPS").textContent = "Rock-Paper-Scissors: " + rps.wins + " Wins / " + rps.losses + " Losses";
-        document.getElementById("profileDuels").textContent = "Duel Speed: " + duels.wins + " Wins / " + duels.losses + " Losses";
-        stats.totalWins = (rps.wins || 0) + (duels.wins || 0);
-        stats.totalMatches = ((rps.wins + rps.losses) || 0) + ((duels.wins + duels.losses) || 0);
-        updateLeaderboardRankings(function() {
-          loadUserTitles(stats);
-          document.getElementById("profileModal").style.display = "flex";
-        });
+    
+    function listenForGroupRooms() {
+      groupRoomsRef.on("child_added", snapshot => {
+        const roomData = snapshot.val();
+        const roomKey = snapshot.key;
+        if (!serverList.some(s => s.type === "group" && s.id === roomKey)) {
+          const channel = { type: "group", id: roomKey, name: roomData.name };
+          serverList.push(channel);
+          updateServerListUI();
+        }
       });
     }
-
-    function hideProfileModal() {
-      document.getElementById("profileModal").style.display = "none";
+    
+    /*********************** Plus Modal Functions ************************/
+    let plusAction = null;
+    function openPlusModal() {
+      document.getElementById("plusModal").style.display = "block";
     }
-
-    window.onload = function() {
-      currentUser = localStorage.getItem("acc_username");
-      if (currentUser) {
-        let storedColor = localStorage.getItem("userColor");
-        if (storedColor) {
-          newDB.ref(NEW_KEYS.accountColors + "/" + currentUser).set(storedColor);
-        }
+    function closePlusModal() {
+      document.getElementById("plusModal").style.display = "none";
+    }
+    function selectPlusAction(action) {
+      plusAction = action;
+      closePlusModal();
+      const inputModal = document.getElementById("inputModal");
+      const titleElem = document.getElementById("inputModalTitle");
+      const inputField = document.getElementById("inputModalField");
+      if(action === "dm"){
+        titleElem.textContent = "Enter DM Username:";
+        inputField.placeholder = "Username";
+      } else {
+        titleElem.textContent = "Enter Room Name:";
+        inputField.placeholder = "Room Name";
       }
-      if (currentUser) {
-        newDB.ref(NEW_KEYS.accounts + "/" + currentUser + "/equippedTitle").set("");
+      inputField.value = "";
+      inputModal.style.display = "block";
+    }
+    function closeInputModal() {
+      document.getElementById("inputModal").style.display = "none";
+    }
+    function submitInputModal() {
+      const inputValue = document.getElementById("inputModalField").value.trim();
+      if(!inputValue) {
+        alert("Please enter a value.");
+        return;
       }
-      document.getElementById("changelogOverlay").style.display = "flex";
-      const darkEnabled = localStorage.getItem("darkModeEnabled") === "true";
-      if (darkEnabled) document.body.classList.add("dark-mode");
-      document.getElementById("themeToggle").checked = darkEnabled;
-      const savedScale = localStorage.getItem("uiScale");
-      if (savedScale) { document.getElementById("guiSizeRange").value = savedScale; adjustGuiScaling(); }
-      refreshGuiScaleDisplay();
-      const savedFont = localStorage.getItem("selectedFont") || "font-arial";
-      document.body.classList.add(savedFont);
-      document.getElementById("fontSelect").value = savedFont;
-      document.getElementById("usernameLengthLimit").value = maxUsernameLength;
-      document.getElementById("messageLengthLimit").value = maxMessageLength;
-      currentUser = localStorage.getItem("acc_username");
-      currentUserPassHash = localStorage.getItem("acc_passHash");
-      refreshAccountInterface();
-      fetchOpList();
-      if (currentUser && !isUserOP()) {
-        newDB.ref(NEW_KEYS.mutedUsers).orderByChild("op").equalTo(currentUser).once("value", (snap) => {
-          if (snap.exists()) {
-            alert("Unauthorized op command detected from a previous version. Your account will be terminated.");
-            securelyTerminateAccount(currentUser);
+      closeInputModal();
+      if(plusAction === "dm"){
+        const participants = [currentUser, inputValue].sort();
+        const dmKey = participants.join("_");
+        dmsRef.child(dmKey).once("value", snapshot => {
+          if (!snapshot.exists()) {
+            dmsRef.child(dmKey).set({
+              participants: participants,
+              createdAt: firebase.database.ServerValue.TIMESTAMP
+            });
+          }
+          if (!accountData.channels) accountData.channels = {};
+          if (!accountData.channels[dmKey]) {
+            accountData.channels[dmKey] = { type: "dm", id: dmKey, name: "DM: " + inputValue };
+            accountsRef.child(currentUser).child("channels").set(accountData.channels);
+            serverList.push(accountData.channels[dmKey]);
+            updateServerListUI();
+          }
+        });
+      } else if(plusAction === "create" || plusAction === "join"){
+        const roomKey = inputValue;
+        groupRoomsRef.child(roomKey).once("value", snapshot => {
+          if (!snapshot.exists()) {
+            groupRoomsRef.child(roomKey).set({
+              name: inputValue,
+              createdBy: currentUser,
+              createdAt: firebase.database.ServerValue.TIMESTAMP
+            }, error => {
+              if (error) alert("Error creating group: " + error);
+            });
+          }
+          if (!accountData.channels) accountData.channels = {};
+          if (!accountData.channels[roomKey]) {
+            accountData.channels[roomKey] = { type: "group", id: roomKey, name: inputValue };
+            accountsRef.child(currentUser).child("channels").set(accountData.channels);
+            serverList.push(accountData.channels[roomKey]);
+            updateServerListUI();
           }
         });
       }
-      activatePublicChatListeners();
-      newDB.ref(NEW_KEYS.typing).on("value", (snap) => {
-        const typObj = snap.val() || {};
-        presentTypingStatus(typObj);
-      });
-      newDB.ref(NEW_KEYS.mutedUsers).on("value", (snap) => { mutedList = snap.val() || {}; });
-      newDB.ref(NEW_KEYS.accountColors).on("value", (snap) => {
-        userColors = snap.val() || {};
-        updateMessageColors();
-      });
-      newDB.ref(NEW_KEYS.broadcasts).on("child_added", (snap) => {
-        const bData = snap.val();
-        renderChatMessage(bData.user, bData.text, true, true, snap.key, bData.timestamp);
-      });
-      newDB.ref(NEW_KEYS.broadcasts).on("child_removed", (snap) => {
-        const remKey = snap.key;
-        const li = document.querySelector(`li[data-key="${remKey}"]`);
-        if (li) li.remove();
-      });
-      newDB.ref(NEW_KEYS.presence).on("value", (snap) => {
-        const presData = snap.val() || {};
-        let membersArr = [];
-        for (let key in presData) {
-          if (presData[key].username) { membersArr.push(presData[key].username); }
+    }
+    
+    /*********************** Delete Modal Functions ************************/
+    let deleteCandidate = null;
+    function openDeleteModal(channel, e) {
+      deleteCandidate = channel;
+      const deleteModal = document.getElementById("deleteModal");
+      document.getElementById("deleteModalText").textContent =
+        "Delete " + (channel.type === "dm" ? "DM" : "Room") + " '" + channel.name + "'?";
+      const rect = e.target.getBoundingClientRect();
+      deleteModal.style.left = (rect.right + 5) + "px";
+      deleteModal.style.top = rect.top + "px";
+      deleteModal.style.display = "block";
+    }
+    function closeDeleteModal() {
+      document.getElementById("deleteModal").style.display = "none";
+      deleteCandidate = null;
+    }
+    function confirmDeleteChannel() {
+      if(deleteCandidate){
+        if(accountData.channels && accountData.channels[deleteCandidate.id]){
+          delete accountData.channels[deleteCandidate.id];
+          accountsRef.child(currentUser).child("channels").set(accountData.channels);
+          localStorage.setItem("accountData", JSON.stringify(accountData));
         }
-        refreshMemberList(membersArr);
-      });
-      initializeTextAreaShortcuts("messageInput", dispatchMessage);
-      initializeTextAreaShortcuts("dmMessageInput", transmitDMChannel1);
-      initializeTextAreaShortcuts("dm2MessageInput", transmitDMChannel2);
-      initializeTextAreaShortcuts("dm3MessageInput", transmitDMChannel3);
+        serverList = serverList.filter(s => !(s.type === deleteCandidate.type && s.id === deleteCandidate.id));
+        updateServerListUI();
+        if(currentServer.type === deleteCandidate.type && currentServer.id === deleteCandidate.id){
+          switchServer({ type:"public", id:"public", name:"Public Chat" });
+        }
+      }
+      closeDeleteModal();
+    }
+    
+    /*********************** Settings Functions ************************/
+    function openSettings() {
+      document.getElementById("settingsScreen").style.display = "block";
+    }
+    function closeSettings() {
+      document.getElementById("settingsScreen").style.display = "none";
+    }
+    function toggleDarkMode() {
+      const isDark = document.getElementById("darkModeToggle").checked;
+      if (isDark) {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
+      if (currentUser) {
+        accountsRef.child(currentUser).update({ darkMode: isDark });
+        accountData.darkMode = isDark;
+        localStorage.setItem("accountData", JSON.stringify(accountData));
+      }
+    }
+    function changeUIFont() {
+      const selectedFont = document.getElementById("fontSelect").value;
+      document.body.style.fontFamily = selectedFont;
+    }
+    
+    /*********************** Music Functions ************************/
+    function toggleMusic() {
+      const bgMusic = document.getElementById("bgMusic");
+      if (bgMusic.paused) {
+        bgMusic.play();
+      } else {
+        bgMusic.pause();
+      }
+    }
+    function changeMusicVolume() {
+      const vol = document.getElementById("musicVolume").value;
+      document.getElementById("bgMusic").volume = vol;
+    }
+    function removeMusic() {
+      const bgMusic = document.getElementById("bgMusic");
+      bgMusic.pause();
+      bgMusic.src = "";
+      alert("Background music removed.");
+    }
+    document.getElementById("musicFileInput") && document.getElementById("musicFileInput").addEventListener("change", function() {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("bgMusic").src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    /*********************** Notifications Functions ************************/
+    function toggleNotifications() {
+      const enabled = document.getElementById("notificationsToggle").checked;
+      localStorage.setItem("notificationsEnabled", enabled);
+      if (enabled) {
+        askNotificationPermission();
+      }
+    }
+    function askNotificationPermission() {
+      if (!("Notification" in window)) {
+        alert("This browser does not support desktop notifications.");
+        return;
+      }
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+    }
+    function showDesktopNotification(title, body) {
       const notifEnabled = localStorage.getItem("notificationsEnabled") === "true";
-      document.getElementById("notificationsToggle").checked = notifEnabled;
-      const soundEnabled = localStorage.getItem("soundNotificationsEnabled") === "true";
-      document.getElementById("soundToggle").checked = soundEnabled;
-      const storedSoundVol = localStorage.getItem("soundVolume");
-      if (storedSoundVol) { document.getElementById("soundVolume").value = storedSoundVol; document.getElementById("chatSound").volume = parseFloat(storedSoundVol); }
-      const showTime = localStorage.getItem("showTimestamps") === "true";
-      document.getElementById("timestampToggle").checked = showTime;
-      if (localStorage.getItem("showUndefinedMessages") === null) {
-        localStorage.setItem("showUndefinedMessages", "false");
+      if (!notifEnabled) return;
+      if (Notification.permission === "granted") {
+        new Notification(title, { body: body, icon: "https://via.placeholder.com/50" });
       }
-      document.getElementById("showUndefinedCheckbox").checked = (localStorage.getItem("showUndefinedMessages") === "true");
-      window.onbeforeunload = () => { clearUserTypingStatus(); };
-      const storedMusic = localStorage.getItem("bgMusic");
-      if (storedMusic) {
-        document.getElementById("bgMusic").src = storedMusic;
-        document.getElementById("bgMusic").volume = localStorage.getItem("musicVolume") || 1;
-        document.getElementById("bgMusic").play();
+    }
+    function checkForMentions(sender, text) {
+      const lowerText = text.toLowerCase();
+      const lowerUser = currentUser ? currentUser.toLowerCase() : "";
+      if (lowerText.indexOf("@" + lowerUser) !== -1) {
+        showDesktopNotification("Mention from " + sender, text);
       }
-      monitorDuelSpeedContests();
-      monitorRPSContests();
-      window.addEventListener("keydown", function(e) {
-        if (e.key === "Escape") {
-          if (document.getElementById("helpModal").style.display !== "none") { hideHelpWindow(); }
-          if (document.getElementById("profileModal").style.display !== "none") { hideProfileModal(); }
-          if (document.getElementById("opToolsModal").style.display !== "none") { closeOpToolsModal(); }
-        }
-      });
-      updateHelpWindowVisibility();
-      refreshOpSectionVisibility();
+    }
 
-      /* ------- Attach New OP Tools Event Listeners -------- */
-      document.getElementById("opExecuteAction").addEventListener("click", function() {
-        var action = document.getElementById("opActionSelect").value;
-        var target = document.getElementById("opTargetUser").value.trim();
-        if(!target) {
-          alert("Please enter a target username.");
-          return;
-        }
-        switch(action) {
-          case "mute":
-            securelyMuteUser(target);
-            break;
-          case "unmute":
-            securelyUnmuteUser(target);
-            break;
-          case "terminate":
-            securelyTerminateAccount(target);
-            break;
-          default:
-            alert("Unknown action.");
+    /*********************** Chat Input Handling ************************/
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("messageInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          const txt = this.value.trim();
+          if (txt) sendMessage();
         }
       });
-      document.getElementById("opSetColor").addEventListener("click", function() {
-        setOpUserColorModal();
-      });
-      document.getElementById("opClearChat").addEventListener("click", securelyClearChatGlobal);
-      document.getElementById("opClearTyping").addEventListener("click", securelyClearTypingGlobal);
-      document.getElementById("opUpdateUsernameLimit").addEventListener("click", function() {
-        updateUsernameLengthLimit();
-      });
-      document.getElementById("opUpdateMessageLimit").addEventListener("click", function() {
-        updateMessageLengthLimit();
-      });
-      document.getElementById("opAssignTitle").addEventListener("click", function() {
-        assignCustomTitle();
-      });
-      document.getElementById("opCloseModal").addEventListener("click", function() {
-        closeOpToolsModal();
-      });
-    };
+      const storedUser = localStorage.getItem("currentUser");
+      const storedAccount = localStorage.getItem("accountData");
+      if (storedUser && storedAccount) {
+        currentUser = storedUser;
+        accountData = JSON.parse(storedAccount);
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("accountInfo").style.display = "block";
+        document.getElementById("currentAcc").textContent = currentUser;
+        if (accountData.darkMode) {
+          document.getElementById("darkModeToggle").checked = true;
+          document.body.classList.add("dark-mode");
+        }
+      }
+    });
   </script>
 </body>
 </html>
